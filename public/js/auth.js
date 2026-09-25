@@ -24,9 +24,27 @@ function hint(id, text, kind = '') {
   el.className = 'field-hint' + (kind ? ' ' + kind : '');
 }
 
+// Частые опечатки в домене: с ошибкой в почте не придёт письмо для сброса пароля
+const DOMAIN_TYPOS = {
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'gmal.com': 'gmail.com',
+  'gmai.com': 'gmail.com',
+  'gmail.co': 'gmail.com',
+  'gmail.ru': 'gmail.com',
+  'gnail.com': 'gmail.com',
+  'mail.ry': 'mail.ru',
+  'mial.ru': 'mail.ru',
+  'yandex.ry': 'yandex.ru',
+  'yadex.ru': 'yandex.ru',
+  'yndex.ru': 'yandex.ru',
+};
+
 function checkEmail(value) {
   if (!value) return hint('email-status', '');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return hint('email-status', '✗ Введите корректный email', 'error');
+  const domain = value.split('@')[1].toLowerCase();
+  if (DOMAIN_TYPOS[domain]) return hint('email-status', `Возможно, вы имели в виду @${DOMAIN_TYPOS[domain]}?`, 'error');
   hint('email-status', '✓ Email корректный', 'success');
 }
 
@@ -101,6 +119,8 @@ function handleRegister(e) {
 
   if (!email || !login || !password || !confirm || !steamId) return showError('Заполните все поля');
   if (password !== confirm) return showError('Пароли не совпадают');
+  const typo = DOMAIN_TYPOS[email.split('@')[1]?.toLowerCase()];
+  if (typo) return showError(`Проверьте почту: возможно, вы имели в виду @${typo}`);
   if (!/^7656119\d{10}$/.test(steamId)) return showError('Steam ID — 17 цифр, начинается с 7656119 (steamID64 на steamid.io)');
 
   withLoading(submitBtn(e), async () => {
