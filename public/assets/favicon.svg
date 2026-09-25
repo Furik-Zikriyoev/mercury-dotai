@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none">
+  <rect width="56" height="56" rx="12" fill="#111520"/>
+  <defs>
+    <radialGradient id="pg" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#d0ccfa"/>
+      <stop offset="55%" stop-color="#8B83E0"/>
+      <stop offset="100%" stop-color="#3D3699"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7F77DD" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#7F77DD" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="28" cy="28" r="27" fill="url(#glow)"/>
+  <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.18)" stroke-width="0.6"/>
+  <!-- Дальние звёзды -->
+  <circle cx="36" cy="3"  r="1.1" fill="#534AB7" opacity="0.7"/>
+  <circle cx="52" cy="18" r="0.9" fill="#7F77DD" opacity="0.6"/>
+  <circle cx="53" cy="36" r="1.1" fill="#534AB7" opacity="0.7"/>
+  <circle cx="40" cy="52" r="0.9" fill="#7F77DD" opacity="0.6"/>
+  <circle cx="18" cy="53" r="1.1" fill="#534AB7" opacity="0.7"/>
+  <circle cx="4"  cy="38" r="0.9" fill="#7F77DD" opacity="0.6"/>
+  <circle cx="3"  cy="18" r="1.1" fill="#534AB7" opacity="0.7"/>
+  <circle cx="18" cy="3"  r="0.9" fill="#7F77DD" opacity="0.6"/>
+  <!-- Узлы на орбите -->
+  <circle cx="28"   cy="6"    r="2.2" fill="#AFA9EC"/>
+  <circle cx="43.6" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+  <circle cx="50"   cy="28"   r="2.2" fill="#AFA9EC"/>
+  <circle cx="43.6" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+  <circle cx="28"   cy="50"   r="2.2" fill="#AFA9EC"/>
+  <circle cx="12.4" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+  <circle cx="6"    cy="28"   r="2.2" fill="#AFA9EC"/>
+  <circle cx="12.4" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+  <!-- Линии созвездий основные -->
+  <line x1="28"   y1="8.2"  x2="42"   y2="13"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="44.8" y1="13"   x2="48.2"  y2="26"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="48.2" y1="30"   x2="44.8"  y2="43"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="42"   y1="43"   x2="28"   y2="47.8"  stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="14"   y1="43"   x2="7.8"  y2="30"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="7.8"  y1="26"   x2="14"   y2="13"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <line x1="24"   y1="47.8" x2="13"   y2="43"   stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+  <!-- Линии к дальним звёздам -->
+  <line x1="28"   y1="8.2"  x2="36"  y2="3"    stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="28"   y1="8.2"  x2="18"  y2="3"    stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="43.6" y1="11.4" x2="52"  y2="18"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50"   y1="28"   x2="53"  y2="36"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="43.6" y1="44.6" x2="40"  y2="52"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="28"   y1="50"   x2="18"  y2="53"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="12.4" y1="44.6" x2="4"   y2="38"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="6"    y1="28"   x2="3"   y2="18"   stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="12.4" y1="11.4" x2="18"  y2="3"    stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+  <!-- Диагональные -->
+  <line x1="43.6" y1="11.4" x2="50"   y2="28"  stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="43.6" y1="44.6" x2="50"   y2="28"  stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="12.4" y1="11.4" x2="6"    y2="28"  stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="12.4" y1="44.6" x2="6"    y2="28"  stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="28"   y1="6"    x2="43.6" y2="11.4" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="28"   y1="6"    x2="12.4" y2="11.4" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="28"   y1="50"   x2="43.6" y2="44.6" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+  <line x1="28"   y1="50"   x2="12.4" y2="44.6" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+  <!-- Планета -->
+  <circle cx="28" cy="28" r="11" fill="url(#pg)"/>
+  <ellipse cx="23.5" cy="23" rx="4.2" ry="2.8" fill="rgba(255,255,255,0.22)" transform="rotate(-30,23.5,23)"/>
+  <ellipse cx="31" cy="33" rx="3.5" ry="2" fill="rgba(0,0,0,0.18)" transform="rotate(-30,31,33)"/>
+  <circle cx="28" cy="28" r="13.5" fill="none" stroke="rgba(175,169,236,0.28)" stroke-width="0.6"/>
+</svg>

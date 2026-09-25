@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury DotAi — Войти</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-canvas" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="auth-page">
+
+  <!-- ========== TWO COLUMNS ========== -->
+  <div class="auth-columns">
+
+    <!-- ===== LEFT ===== -->
+    <div class="auth-left">
+      <!-- Logo -->
+      <div class="brand">
+        <svg width="38" height="38" viewBox="0 0 56 56" fill="none">
+          <defs>
+            <radialGradient id="pg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7F77DD" stop-opacity="0.25"/><stop offset="100%" stop-color="#7F77DD" stop-opacity="0"/></radialGradient>
+          </defs>
+          <circle cx="28" cy="28" r="27" fill="url(#glow)"/>
+          <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.18)" stroke-width="0.6"/>
+          <circle cx="36" cy="3" r="1.1" fill="#534AB7" opacity="0.7"/><circle cx="52" cy="18" r="0.9" fill="#7F77DD" opacity="0.6"/>
+          <circle cx="53" cy="36" r="1.1" fill="#534AB7" opacity="0.7"/><circle cx="40" cy="52" r="0.9" fill="#7F77DD" opacity="0.6"/>
+          <circle cx="18" cy="53" r="1.1" fill="#534AB7" opacity="0.7"/><circle cx="4" cy="38" r="0.9" fill="#7F77DD" opacity="0.6"/>
+          <circle cx="3" cy="18" r="1.1" fill="#534AB7" opacity="0.7"/><circle cx="18" cy="3" r="0.9" fill="#7F77DD" opacity="0.6"/>
+          <circle cx="28" cy="6" r="2.2" fill="#AFA9EC"/><circle cx="43.6" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+          <circle cx="50" cy="28" r="2.2" fill="#AFA9EC"/><circle cx="43.6" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+          <circle cx="28" cy="50" r="2.2" fill="#AFA9EC"/><circle cx="12.4" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+          <circle cx="6" cy="28" r="2.2" fill="#AFA9EC"/><circle cx="12.4" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+          <line x1="28" y1="8.2" x2="42" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="44.8" y1="13" x2="48.2" y2="26" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="48.2" y1="30" x2="44.8" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="42" y1="43" x2="28" y2="47.8" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="14" y1="43" x2="7.8" y2="30" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="7.8" y1="26" x2="14" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="24" y1="47.8" x2="13" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="28" y1="8.2" x2="36" y2="3" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="28" y1="8.2" x2="18" y2="3" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="43.6" y1="11.4" x2="52" y2="18" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="50" y1="28" x2="53" y2="36" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="43.6" y1="44.6" x2="40" y2="52" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="28" y1="50" x2="18" y2="53" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="12.4" y1="44.6" x2="4" y2="38" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="6" y1="28" x2="3" y2="18" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="12.4" y1="11.4" x2="18" y2="3" stroke="rgba(127,119,221,0.25)" stroke-width="0.5" stroke-linecap="round"/>
+          <line x1="43.6" y1="11.4" x2="50" y2="28" stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="43.6" y1="44.6" x2="50" y2="28" stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="12.4" y1="11.4" x2="6" y2="28" stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="12.4" y1="44.6" x2="6" y2="28" stroke="rgba(175,169,236,0.18)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="28" y1="6" x2="43.6" y2="11.4" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="28" y1="6" x2="12.4" y2="11.4" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="28" y1="50" x2="43.6" y2="44.6" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+          <line x1="28" y1="50" x2="12.4" y2="44.6" stroke="rgba(175,169,236,0.14)" stroke-width="0.4" stroke-linecap="round"/>
+          <circle cx="28" cy="28" r="11" fill="url(#pg)"/>
+          <ellipse cx="23.5" cy="23" rx="4.2" ry="2.8" fill="rgba(255,255,255,0.22)" transform="rotate(-30,23.5,23)"/>
+          <ellipse cx="31" cy="33" rx="3.5" ry="2" fill="rgba(0,0,0,0.18)" transform="rotate(-30,31,33)"/>
+          <circle cx="28" cy="28" r="13.5" fill="none" stroke="rgba(175,169,236,0.28)" stroke-width="0.6"/>
+        </svg>
+        <span class="brand-name">Mercury <span class="accent">DotAi</span></span>
+      </div>
+
+      <!-- Description -->
+      <div class="left-content">
+        <h1 class="left-heading">
+          Твой путь<br>в <span class="highlight">киберспорт</span><br>начинается здесь
+        </h1>
+        <p class="left-desc-text">
+          Твоя персональная аналитика и стратегия, разработанная с помощью
+          искусственного интеллекта для улучшения твоего развития в игре.
+          Анализируй ошибки, получай рекомендации и расти быстрее.
+        </p>
+        <span class="left-slogan">Дорога в киберспорт</span>
+      </div>
+
+      <!-- Rotating Mercury planet with neural overlay -->
+      <div class="planet-illustration">
+        <div class="planet-scene">
+          <div class="planet-glow"></div>
+          <canvas id="mercury-canvas" width="280" height="280"></canvas>
+          <canvas id="neural-canvas" width="280" height="280"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT ===== -->
+    <div class="auth-right">
+      <div class="auth-card">
+
+        <!-- VIEW: MAIN -->
+        <div class="auth-view visible" id="view-main">
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" onclick="showTab('login')">Вход</button>
+            <button class="auth-tab" id="tab-register" onclick="showTab('register')">Регистрация</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form class="auth-form visible" id="form-login" onsubmit="handleLogin(event)" novalidate>
+            <div class="field-group">
+              <label class="field-label" for="login-input">Логин</label>
+              <input class="field-input" id="login-input" type="text" placeholder="your_username" autocomplete="username"/>
+            </div>
+            <div class="field-group">
+              <div class="field-row">
+                <label class="field-label" for="pass-input">Пароль</label>
+                <button type="button" class="forgot-link" onclick="showView('forgot')">Забыли пароль?</button>
+              </div>
+              <input class="field-input" id="pass-input" type="password" placeholder="••••••••" autocomplete="current-password"/>
+            </div>
+            <button type="submit" class="btn-primary">Войти в Mercury DotAi</button>
+            <p class="auth-switch">Нет аккаунта? <a onclick="showTab('register')">Зарегистрироваться</a></p>
+          </form>
+
+          <!-- REGISTER -->
+          <form class="auth-form" id="form-register" onsubmit="handleRegister(event)" novalidate>
+            <div class="field-group">
+              <label class="field-label" for="reg-email">Email</label>
+              <input class="field-input" id="reg-email" type="email" placeholder="your@email.com"
+                     oninput="checkEmail(this.value)" autocomplete="email"/>
+              <p class="field-hint" id="email-status"></p>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="reg-login">Логин</label>
+              <input class="field-input" id="reg-login" type="text" placeholder="your_username"
+                     oninput="checkLogin(this.value)" autocomplete="username"/>
+              <p class="field-hint" id="login-status"></p>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="reg-pass">Пароль</label>
+              <input class="field-input" id="reg-pass" type="password" placeholder="••••••••"
+                     oninput="checkPassword(this.value)" autocomplete="new-password"/>
+              <p class="field-hint" id="pass-status"></p>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="reg-confirm">Повтор пароля</label>
+              <input class="field-input" id="reg-confirm" type="password" placeholder="••••••••"
+                     oninput="checkConfirm(this.value)" autocomplete="new-password"/>
+              <p class="field-hint" id="confirm-status"></p>
+            </div>
+            <div class="field-divider"></div>
+            <p class="field-section-label">Dota 2</p>
+            <div class="field-group">
+              <label class="field-label" for="reg-steam">Steam ID</label>
+              <input class="field-input" id="reg-steam" type="text" placeholder="76561198XXXXXXXXX"/>
+              <p class="field-hint">Найти на <a href="https://steamid.io" target="_blank" style="color:var(--accent-light)">steamid.io</a></p>
+            </div>
+            <button type="submit" class="btn-primary">Создать аккаунт</button>
+            <p class="auth-switch">Уже есть аккаунт? <a onclick="showTab('login')">Войти</a></p>
+          </form>
+        </div>
+
+        <!-- VIEW: FORGOT -->
+        <div class="auth-view" id="view-forgot">
+          <button type="button" class="back-link" onclick="showView('main')">← Назад</button>
+          <form onsubmit="handleForgot(event)" novalidate>
+            <div class="field-group">
+              <label class="field-label" for="forgot-email">Ваш email</label>
+              <input class="field-input" id="forgot-email" type="email" placeholder="your@email.com"/>
+              <p class="field-hint">Отправим ссылку для сброса пароля</p>
+            </div>
+            <button type="submit" class="btn-primary">Отправить письмо</button>
+            <button type="button" class="btn-ghost" onclick="showView('main')">Отмена</button>
+          </form>
+        </div>
+
+        <!-- VIEW: FORGOT SENT -->
+        <div class="auth-view" id="view-forgot-sent">
+          <button type="button" class="back-link" onclick="showView('main')">← Назад ко входу</button>
+          <div class="success-box">
+            <p>Письмо отправлено. Проверьте почту и перейдите по ссылке для сброса пароля.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="auth-footer">
+    <div class="footer-grid">
+
+      <!-- Col 1 — Brand -->
+      <div class="footer-brand">
+        <div class="brand" style="margin-bottom:12px">
+          <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+            <defs>
+              <radialGradient id="fpg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient>
+            </defs>
+            <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.2)" stroke-width="0.6"/>
+            <circle cx="28" cy="6" r="2" fill="#AFA9EC"/><circle cx="50" cy="28" r="2" fill="#AFA9EC"/>
+            <circle cx="28" cy="50" r="2" fill="#AFA9EC"/><circle cx="6" cy="28" r="2" fill="#AFA9EC"/>
+            <circle cx="43.6" cy="11.4" r="1.4" fill="#7F77DD" opacity="0.8"/><circle cx="43.6" cy="44.6" r="1.4" fill="#7F77DD" opacity="0.8"/>
+            <circle cx="12.4" cy="44.6" r="1.4" fill="#7F77DD" opacity="0.8"/><circle cx="12.4" cy="11.4" r="1.4" fill="#7F77DD" opacity="0.8"/>
+            <line x1="28" y1="8" x2="42" y2="13" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <line x1="44" y1="13" x2="48" y2="26" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <line x1="48" y1="30" x2="44" y2="43" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <line x1="42" y1="43" x2="28" y2="48" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <line x1="14" y1="43" x2="8" y2="30" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <line x1="8" y1="26" x2="14" y2="13" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/>
+            <circle cx="28" cy="28" r="11" fill="url(#fpg)"/>
+            <ellipse cx="23.5" cy="23" rx="4" ry="2.6" fill="rgba(255,255,255,0.2)" transform="rotate(-30,23.5,23)"/>
+          </svg>
+          <span class="brand-name" style="font-size:18px">Mercury <span class="accent">DotAi</span></span>
+        </div>
+        <p class="footer-brand-desc">
+          Интеллектуальная система персональной аналитики для игроков Dota 2.
+          Дипломная работа по разработке ИИ-сервиса.
+        </p>
+        <p class="footer-author">Разработано: <span>Furuzonfar Zikriyoev</span></p>
+      </div>
+
+      <!-- Col 2 — Contacts -->
+      <div>
+        <p class="footer-col-title">Контакты</p>
+        <ul class="footer-contacts">
+          <li>
+            <a href="mailto:zff2304@mail.ru">
+              <svg class="contact-icon" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+              zff2304@mail.ru
+            </a>
+          </li>
+          <li>
+            <a href="tel:+79969025411">
+              <svg class="contact-icon" viewBox="0 0 16 16" fill="none">
+                <path d="M3 2h3l1.5 3.5-1.5 1a8 8 0 003.5 3.5l1-1.5L14 10v3a1 1 0 01-1 1C6 14 2 10 2 3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+              +7 996 902-54-11
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Col 3 — Social -->
+      <div>
+        <p class="footer-col-title">Соцсети</p>
+        <div class="footer-socials">
+          <a href="https://vk.com/mercury_tjk" target="_blank" class="social-link">
+            <div class="social-icon">
+              <!-- VK icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z" fill="none"/>
+                <path d="M13.16 17c-.24 0-.32-.16-.52-.5-.68-1.14-1.44-2.02-1.88-2.56-.2-.26-.34-.36-.52-.36-.22 0-.28.14-.28.52v2.24c0 .42-.14.66-.98.66-1.4 0-2.94-.86-4.04-2.44C3.82 12.82 3 10.6 3 8.6c0-.28.1-.5.52-.5h1.76c.38 0 .52.18.66.58.72 2.08 1.94 3.9 2.44 3.9.18 0 .26-.08.26-.56V9.28c-.06-1-.58-1.08-.58-1.44 0-.2.16-.4.42-.4h2.76c.34 0 .44.18.44.56v3.02c0 .34.16.46.26.46.18 0 .34-.12.68-.46 1.04-1.16 1.78-2.96 1.78-2.96.1-.22.28-.44.66-.44h1.76c.52 0 .64.28.52.56-.24.98-2.36 3.96-2.36 3.96-.2.3-.26.44 0 .78.18.24.78.76 1.18 1.22.74.84 1.3 1.54 1.46 2.04.16.46-.08.7-.52.7H13.16z" fill="#AFA9EC"/>
+              </svg>
+            </div>
+            VK
+          </a>
+          <a href="https://instagram.com/mercury.1.9" target="_blank" class="social-link">
+            <div class="social-icon">
+              <!-- Instagram icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="2" width="20" height="20" rx="6" stroke="#AFA9EC" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="4" stroke="#AFA9EC" stroke-width="1.5"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="#AFA9EC"/>
+              </svg>
+            </div>
+            Instagram
+          </a>
+          <a href="https://t.me/mercury23" target="_blank" class="social-link">
+            <div class="social-icon">
+              <!-- Telegram icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M22 2L11 13" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 2L15 22l-4-9-9-4 20-7z" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            Telegram
+          </a>
+        </div>
+      </div>
+
+      <!-- Col 4 — Features -->
+      <div>
+        <p class="footer-col-title">Возможности</p>
+        <ul class="footer-features">
+          <li>ИИ-анализ ошибок</li>
+          <li>Рекомендации героев</li>
+          <li>ML-предсказания</li>
+          <li>Лучшее время игры</li>
+          <li>Сравнение игроков</li>
+          <li>Тренды прогресса</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 <span>Mercury DotAi</span> · Дипломная работа · <span>Furuzonfar Zikriyoev</span></p>
+      <p class="footer-powered">Powered by OpenDota API</p>
+    </div>
+  </footer>
+
+</div>
+
+<style>
+.planet-scene {
+  position: relative;
+  width: 280px; height: 280px;
+  margin: 0 auto;
+}
+.planet-rings {
+  position: absolute;
+  inset: -40px;
+  pointer-events: none;
+  animation: ringRotate 18s linear infinite;
+}
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.planet-glow {
+  position: absolute;
+  inset: -50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100,80,220,0.3) 0%, rgba(60,40,160,0.12) 45%, transparent 70%);
+  animation: glowPulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes glowPulse {
+  0%,100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+#mercury-canvas {
+  display: block;
+  position: relative;
+  z-index: 2;
+  border-radius: 50%;
+}
+#neural-canvas {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 50%;
+}
+</style>
+
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  // === PLANET ===
+  const planetCanvas = document.getElementById('mercury-canvas');
+  if (!planetCanvas) return;
+  const pc = planetCanvas.getContext('2d');
+  const PW = planetCanvas.width, PH = planetCanvas.height;
+  const pcx = PW / 2, pcy = PH / 2, PR = PW / 2 - 2;
+
+  // Build texture (3× wide for seamless scroll)
+  const TW = PW * 3, TH = PH;
+  const tex = document.createElement('canvas');
+  tex.width = TW; tex.height = TH;
+  const tx = tex.getContext('2d');
+
+  // Base — deep space purple-blue
+  const bg = tx.createLinearGradient(0, 0, TW, 0);
+  const stops = ['#1a1240','#251a5a','#301f6e','#3a2580','#2d1c68','#221554','#1a1240'];
+  stops.forEach((c, i) => bg.addColorStop(i / (stops.length - 1), c));
+  tx.fillStyle = bg; tx.fillRect(0, 0, TW, TH);
+
+  // Swirling cloud bands (like gas giant)
+  const rng = s => { let x = Math.sin(s) * 43758.5453; return x - Math.floor(x); };
+  const cloudBands = [
+    { y: 0.08, h: 0.09, cols: ['#4a3890','#6050b0','#4a3890'], amp: 14 },
+    { y: 0.22, h: 0.06, cols: ['#3a2c78','#503c98','#3a2c78'], amp: 10 },
+    { y: 0.32, h: 0.10, cols: ['#5040a0','#7060c0','#5040a0'], amp: 16 },
+    { y: 0.46, h: 0.07, cols: ['#3030708','#483888','#303070'], amp: 8  },
+    { y: 0.57, h: 0.09, cols: ['#4838900','#6858b0','#483890'], amp: 12 },
+    { y: 0.70, h: 0.06, cols: ['#382870','#503888','#382870'], amp: 9  },
+    { y: 0.80, h: 0.10, cols: ['#4040908','#5a50a8','#404090'], amp: 13 },
+    { y: 0.92, h: 0.06, cols: ['#2a2060','#403080','#2a2060'], amp: 7  },
+  ];
+
+  cloudBands.forEach(b => {
+    for (let x = 0; x < TW; x++) {
+      const wave = Math.sin(x * 0.018 + b.y * 20) * b.amp
+                 + Math.sin(x * 0.007 + b.y * 11) * b.amp * 0.5
+                 + Math.sin(x * 0.041) * b.amp * 0.3;
+      const yBase = (b.y + wave / TH) * TH;
+      const bandH = b.h * TH;
+      const grad = tx.createLinearGradient(0, yBase, 0, yBase + bandH);
+      const col = b.cols[1];
+      grad.addColorStop(0,   col + '00');
+      grad.addColorStop(0.35, col + '28');
+      grad.addColorStop(0.5,  col + '45');
+      grad.addColorStop(0.65, col + '28');
+      grad.addColorStop(1,   col + '00');
+      tx.fillStyle = grad;
+      tx.fillRect(x, yBase, 1, bandH);
+    }
+  });
+
+  // Vortex swirls
+  for (let i = 0; i < 6; i++) {
+    const sx = rng(i * 4.1) * TW;
+    const sy = rng(i * 9.3) * TH;
+    const sr = 20 + rng(i * 6.7) * 35;
+    const vortex = tx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+    vortex.addColorStop(0, 'rgba(180,150,255,0.12)');
+    vortex.addColorStop(0.4, 'rgba(120,90,200,0.06)');
+    vortex.addColorStop(1, 'rgba(60,40,140,0)');
+    tx.fillStyle = vortex; tx.beginPath(); tx.arc(sx, sy, sr, 0, Math.PI*2); tx.fill();
+  }
+
+  // Bright energy streaks
+  for (let i = 0; i < 12; i++) {
+    const lx = rng(i * 2.3) * TW;
+    const ly = rng(i * 8.1) * TH;
+    const lh = 1 + rng(i * 5.5) * 3;
+    const la = 0.06 + rng(i * 3.7) * 0.08;
+    tx.fillStyle = `rgba(200,180,255,${la})`;
+    tx.fillRect(lx, ly, rng(i*1.9) * 80 + 20, lh);
+  }
+
+  // === NEURAL OVERLAY CANVAS ===
+  const neuralCanvas = document.getElementById('neural-canvas');
+  const nc = neuralCanvas.getContext('2d');
+  const NW = neuralCanvas.width, NH = neuralCanvas.height;
+  const ncx = NW / 2, ncy = NH / 2, NR = NW / 2 - 4;
+
+  // Generate neural nodes (fixed positions on sphere surface)
+  const nodes = [];
+  const rng2 = s => { let x = Math.sin(s*13.7)*39871.22; return x-Math.floor(x); };
+  for (let i = 0; i < 22; i++) {
+    const angle = rng2(i * 2.1) * Math.PI * 2;
+    const dist  = (0.3 + rng2(i * 7.3) * 0.62) * NR;
+    nodes.push({
+      x: ncx + Math.cos(angle) * dist,
+      y: ncy + Math.sin(angle) * dist,
+      r: 1.5 + rng2(i * 5.1) * 2.5,
+      pulse: rng2(i * 3.3) * Math.PI * 2,
+      speed: 0.015 + rng2(i * 8.7) * 0.025,
+    });
+  }
+
+  // Connect nearby nodes
+  const connections = [];
+  nodes.forEach((a, i) => {
+    nodes.forEach((b, j) => {
+      if (j <= i) return;
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < NR * 0.72) connections.push({ i, j, d });
+    });
+  });
+
+  // Pre-sample texture into pixel array for fast raycast lookup
+  const texCtx = tex.getContext('2d');
+  const texData = texCtx.getImageData(0, 0, TW, TH);
+  const texPx = texData.data;
+
+  function sampleTex(u, v) {
+    const tx2 = Math.floor(((u % 1 + 1) % 1) * TW);
+    const ty2 = Math.floor(Math.max(0, Math.min(1, v)) * (TH - 1));
+    const idx = (ty2 * TW + tx2) * 4;
+    return [texPx[idx], texPx[idx+1], texPx[idx+2]];
+  }
+
+  // Sphere output ImageData
+  const sphereImg = pc.createImageData(PW, PH);
+  const spx = sphereImg.data;
+
+  // Light direction (top-right)
+  const Lx = 0.5, Ly = -0.6, Lz = 0.62;
+  const Llen = Math.sqrt(Lx*Lx + Ly*Ly + Lz*Lz);
+
+  let neuralT = 0;
+  let rotAngle = 0;
+  const SPEED = 0.004; // radians per frame — smooth 3D rotation
+
+  function draw() {
+    // --- Sphere ray-cast ---
+    for (let py = 0; py < PH; py++) {
+      for (let px2 = 0; px2 < PW; px2++) {
+        const nx = (px2 - pcx) / PR;
+        const ny = (py - pcy) / PR;
+        const r2 = nx*nx + ny*ny;
+        const idx = (py * PW + px2) * 4;
+        if (r2 > 1) { spx[idx+3] = 0; continue; }
+
+        const nz = Math.sqrt(1 - r2);
+
+        // Real spherical UV — rotation via longitude angle
+        const lon = Math.atan2(nx, nz); // -π to π
+        const lat = Math.asin(Math.max(-1, Math.min(1, ny))); // -π/2 to π/2
+        const u = (lon / (Math.PI * 2) + rotAngle / (Math.PI * 2) + 1.5) % 1;
+        const v = 0.5 - lat / Math.PI;
+
+        const [r, g, b] = sampleTex(u, v);
+
+        // Diffuse + ambient lighting
+        const diff = Math.max(0, (nx*Lx + ny*Ly + nz*Lz) / Llen);
+        const lit = 0.20 + 0.80 * diff;
+
+        // Soft shadow on left edge
+        const shadow = Math.max(0, Math.min(1, nx * 0.65 + 0.42));
+        const final = lit * (0.35 + 0.65 * shadow);
+
+        spx[idx]   = Math.min(255, r * final);
+        spx[idx+1] = Math.min(255, g * final);
+        spx[idx+2] = Math.min(255, b * final + (1 - shadow) * 12);
+        spx[idx+3] = 255;
+      }
+    }
+    pc.putImageData(sphereImg, 0, 0);
+
+    // Specular glint
+    pc.save();
+    pc.beginPath(); pc.arc(pcx, pcy, PR, 0, Math.PI*2); pc.clip();
+    const glint = pc.createRadialGradient(pcx+PR*0.38, pcy-PR*0.38, 0, pcx+PR*0.38, pcy-PR*0.38, PR*0.42);
+    glint.addColorStop(0, 'rgba(255,245,255,0.30)');
+    glint.addColorStop(0.5, 'rgba(200,180,255,0.07)');
+    glint.addColorStop(1, 'rgba(200,180,255,0)');
+    pc.fillStyle = glint; pc.fillRect(0,0,PW,PH);
+    pc.restore();
+
+    // Atmospheric ring
+    pc.save();
+    const ring = pc.createRadialGradient(pcx,pcy,PR-1,pcx,pcy,PR+18);
+    ring.addColorStop(0, 'rgba(100,70,220,0.38)');
+    ring.addColorStop(0.5, 'rgba(80,50,180,0.13)');
+    ring.addColorStop(1, 'rgba(60,40,160,0)');
+    pc.fillStyle = ring;
+    pc.beginPath(); pc.arc(pcx,pcy,PR+18,0,Math.PI*2); pc.fill();
+    pc.restore();
+
+    rotAngle += SPEED;
+
+    // --- Neural overlay ---
+    nc.clearRect(0, 0, NW, NH);
+    nc.save();
+    nc.beginPath(); nc.arc(ncx, ncy, NR, 0, Math.PI*2); nc.clip();
+
+    // Connections
+    connections.forEach(conn => {
+      const a = nodes[conn.i], b = nodes[conn.j];
+      const alpha = 0.06 + 0.06 * Math.sin(neuralT * 0.8 + conn.i * 0.5);
+      const pulse = 0.5 + 0.5 * Math.sin(neuralT * 1.2 + conn.d * 0.02);
+      nc.strokeStyle = `rgba(180,160,255,${alpha * pulse})`;
+      nc.lineWidth = 0.6;
+      nc.beginPath(); nc.moveTo(a.x, a.y); nc.lineTo(b.x, b.y); nc.stroke();
+    });
+
+    // Nodes
+    nodes.forEach(n => {
+      n.pulse += n.speed;
+      const pulse = 0.5 + 0.5 * Math.sin(n.pulse);
+      const alpha = 0.3 + 0.5 * pulse;
+      const r = n.r * (0.7 + 0.3 * pulse);
+
+      // Glow
+      const ng = nc.createRadialGradient(n.x, n.y, 0, n.x, n.y, r*3);
+      ng.addColorStop(0, `rgba(200,180,255,${alpha * 0.4})`);
+      ng.addColorStop(1, 'rgba(200,180,255,0)');
+      nc.fillStyle = ng;
+      nc.beginPath(); nc.arc(n.x, n.y, r*3, 0, Math.PI*2); nc.fill();
+
+      // Core dot
+      nc.fillStyle = `rgba(220,210,255,${alpha})`;
+      nc.beginPath(); nc.arc(n.x, n.y, r, 0, Math.PI*2); nc.fill();
+    });
+
+    nc.restore();
+
+    neuralT += 0.02;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+</body>
+</html>

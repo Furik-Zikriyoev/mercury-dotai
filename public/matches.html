@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury DotAi — Матчи</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:         #080b11;
+      --bg-card:    #0f1420;
+      --bg-hover:   #141929;
+      --border:     rgba(127,119,221,0.18);
+      --border-sub: rgba(255,255,255,0.06);
+      --accent:     #7F77DD;
+      --accent-d:   #534AB7;
+      --accent-l:   #AFA9EC;
+      --accent-bg:  rgba(127,119,221,0.1);
+      --win:        #4ade80;
+      --win-bg:     rgba(74,222,128,0.08);
+      --win-b:      rgba(74,222,128,0.22);
+      --lose:       #f87171;
+      --lose-bg:    rgba(248,113,113,0.08);
+      --lose-b:     rgba(248,113,113,0.22);
+      --txt:        #e8e6f8;
+      --txt2:       #9994c0;
+      --txt3:       #5f5c80;
+      --txt4:       #3a3760;
+      --r-sm:       6px;
+      --r-md:       10px;
+      --r-lg:       16px;
+      --nav-h:      68px;
+      --shadow:     0 4px 24px rgba(0,0,0,0.4);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:inherit;border:none;background:none}
+
+    /* BG */
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:0.09;pointer-events:none;z-index:0}
+    .o1{width:600px;height:600px;background:#534AB7;top:-150px;left:-150px;animation:of1 12s ease-in-out infinite}
+    .o2{width:450px;height:450px;background:#3C3489;bottom:-100px;right:-100px;animation:of2 15s ease-in-out infinite}
+    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(127,119,221,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(127,119,221,0.03) 1px,transparent 1px);background-size:60px 60px}
+    @keyframes of1{0%,100%{transform:translate(0,0)}50%{transform:translate(35px,-45px)}}
+    @keyframes of2{0%,100%{transform:translate(0,0)}50%{transform:translate(-35px,-25px)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    /* NAVBAR */
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);background:rgba(8,11,17,0.85);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px}
+    .nav-logo{display:flex;align-items:center;gap:11px;flex-shrink:0;transition:opacity .2s}
+    .nav-logo:hover{opacity:.85}
+    .nav-logo-text{font-size:17px;font-weight:600;color:var(--txt);letter-spacing:0.3px}
+    .nav-logo-text .accent{color:var(--accent-l)}
+    .nav-links{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+    .nav-link{padding:7px 16px;border-radius:var(--r-md);font-size:13.5px;font-weight:500;color:var(--txt2);transition:background .2s,color .2s}
+    .nav-link:hover{background:rgba(255,255,255,0.05);color:var(--txt)}
+    .nav-link.active{background:var(--accent-bg);color:var(--accent-l);border:1px solid rgba(127,119,221,0.22)}
+    .nav-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#534AB7,#7F77DD);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;border:1.5px solid rgba(127,119,221,0.35)}
+    .nav-divider{width:1px;height:22px;background:var(--border)}
+    .nav-logout{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r-md);font-size:13px;font-weight:500;color:var(--lose);border:1px solid rgba(248,113,113,0.22);background:rgba(248,113,113,0.06);transition:background .2s}
+    .nav-logout:hover{background:rgba(248,113,113,0.12)}
+
+    /* LOADING OVERLAY */
+    .lov{position:fixed;inset:0;z-index:999;background:rgba(8,11,17,0.88);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
+    .lov-spinner{width:38px;height:38px;border:2.5px solid rgba(127,119,221,0.2);border-top-color:#7F77DD;border-radius:50%;animation:spin .8s linear infinite}
+
+    /* PAGE */
+    .page{position:relative;z-index:1;padding-top:calc(var(--nav-h) + 28px);padding-bottom:60px;max-width:1440px;margin:0 auto;padding-left:32px;padding-right:32px}
+
+    /* CACHE BAR */
+    .cache-bar{display:none;align-items:center;justify-content:space-between;background:rgba(127,119,221,0.07);border:1px solid rgba(127,119,221,0.2);border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:13px}
+    .cache-bar .refresh-btn{background:var(--accent-bg);border:1px solid rgba(127,119,221,0.3);border-radius:8px;padding:5px 14px;font-size:12px;color:var(--accent-l);cursor:pointer;font-family:inherit;transition:background .15s}
+    .cache-bar .refresh-btn:hover{background:rgba(127,119,221,0.18)}
+
+    /* =====================
+       MATCHES LIST VIEW
+    ===================== */
+    .view{display:none}
+    .view.active{display:block;animation:fadeUp .3s ease}
+
+    .page-title{font-size:22px;font-weight:700;margin-bottom:4px}
+    .page-sub{font-size:13px;color:var(--txt3);margin-bottom:20px}
+
+    /* Table */
+    .matches-table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+
+    .matches-table{width:100%;border-collapse:collapse}
+    .matches-table thead tr{border-bottom:1px solid var(--border)}
+    .matches-table th{padding:13px 24px;font-size:11px;font-weight:600;color:var(--txt3);text-align:left;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;user-select:none;cursor:pointer;transition:color .15s}
+    .matches-table th:hover{color:var(--txt2)}
+    .matches-table th.sorted{color:var(--accent-l)}
+    .sort-icon{margin-left:4px;opacity:0.5;font-size:10px}
+    .th-nosort{cursor:default}
+    .th-nosort:hover{color:var(--txt3)}
+
+    .matches-table tbody tr{border-bottom:1px solid var(--border-sub);cursor:pointer;transition:background .15s}
+    .matches-table tbody tr:hover{background:var(--bg-hover)}
+    .matches-table tbody tr:last-child{border-bottom:none}
+    .matches-table td{padding:14px 24px;font-size:13px;color:var(--txt2);vertical-align:middle;white-space:nowrap}
+
+    /* Win/lose stripe */
+    .matches-table tbody tr.win-row td:first-child{box-shadow:inset 3px 0 0 var(--win)}
+    .matches-table tbody tr.lose-row td:first-child{box-shadow:inset 3px 0 0 var(--lose)}
+
+    /* Hero cell */
+    .hero-cell{display:flex;align-items:center;gap:10px}
+    .hero-icon-sm{width:38px;height:38px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(127,119,221,0.15)}
+    .hero-icon-sm img{width:100%;height:100%;object-fit:cover;object-position:center top}
+    .hero-info .hero-name{font-size:13px;font-weight:600;color:var(--txt)}
+    .hero-info .match-time{font-size:11px;color:var(--txt3);margin-top:2px}
+
+    /* Result badge */
+    .result-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+    .result-badge.win{background:var(--win-bg);color:var(--win);border:1px solid var(--win-b)}
+    .result-badge.lose{background:var(--lose-bg);color:var(--lose);border:1px solid var(--lose-b)}
+
+    /* Role icon */
+    .role-icon{width:22px;height:22px;object-fit:contain;opacity:0.85}
+
+    /* Duration */
+    .duration-cell{font-size:13px;color:var(--txt);font-variant-numeric:tabular-nums}
+
+    /* KDA */
+    .kda-cell{font-size:12px;color:var(--txt2)}
+    .kda-cell .kda-val{font-size:14px;font-weight:600;color:var(--txt);margin-right:6px}
+
+    /* Numbers */
+    .num-cell{font-size:13px;color:var(--txt);font-variant-numeric:tabular-nums}
+
+    /* Filter buttons */
+    .filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;color:var(--txt3);border:1px solid var(--border);background:transparent;transition:background .15s,color .15s,border-color .15s}
+    .filter-btn:hover{color:var(--txt2);background:rgba(255,255,255,0.04)}
+    .filter-btn.active{background:var(--accent-bg);color:var(--accent-l);border-color:rgba(127,119,221,0.35)}
+    /* No-data row */
+    .matches-table tbody tr.no-data td{opacity:0.55}
+    .matches-table tbody tr.no-data:hover td{opacity:0.8}
+
+    /* Load more */
+    .load-more-wrap{display:flex;justify-content:center;padding:18px}
+    .load-more-btn{padding:10px 28px;border-radius:var(--r-md);font-size:13px;font-weight:500;color:var(--accent-l);border:1px solid rgba(127,119,221,0.3);background:var(--accent-bg);transition:background .2s}
+    .load-more-btn:hover{background:rgba(127,119,221,0.18)}
+    .load-more-btn:disabled{opacity:0.4;cursor:default}
+
+    /* =====================
+       MATCH DETAIL VIEW
+    ===================== */
+    .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--txt3);margin-bottom:20px;transition:color .15s;cursor:pointer}
+    .back-btn:hover{color:var(--accent-l)}
+
+    /* Match header */
+    .match-header{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px 28px;margin-bottom:16px;box-shadow:var(--shadow)}
+    .match-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+    .teams-score{display:flex;align-items:center;gap:20px}
+    .team-block{text-align:center}
+    .team-name{font-size:12px;font-weight:600;letter-spacing:0.5px;margin-bottom:4px}
+    .team-name.radiant{color:var(--win)}
+    .team-name.dire{color:var(--lose)}
+    .team-score{font-size:40px;font-weight:800;line-height:1}
+    .team-score.radiant{color:var(--win)}
+    .team-score.dire{color:var(--lose)}
+    .match-winner-badge{background:var(--win-bg);border:1px solid var(--win-b);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;color:var(--win);text-align:center}
+    .match-meta-tags{display:flex;gap:8px;flex-wrap:wrap}
+    .meta-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border-sub);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--txt3)}
+
+    /* Players table */
+    .team-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+    .team-header{padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:0.5px}
+    .team-header.radiant{background:rgba(74,222,128,0.08);color:var(--win);border-bottom:1px solid var(--win-b)}
+    .team-header.dire{background:rgba(248,113,113,0.08);color:var(--lose);border-bottom:1px solid var(--lose-b)}
+
+    .players-table{width:100%;border-collapse:collapse}
+    .players-table th{padding:9px 14px;font-size:10px;font-weight:600;color:var(--txt3);text-align:left;letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid var(--border-sub)}
+    .players-table td{padding:11px 14px;font-size:12px;color:var(--txt2);border-bottom:1px solid var(--border-sub);vertical-align:middle}
+    .players-table tr:last-child td{border-bottom:none}
+    .players-table tr.my-row{background:rgba(127,119,221,0.07)}
+    .players-table tr:hover{background:var(--bg-hover)}
+
+    /* Player hero cell */
+    .player-hero{display:flex;align-items:center;gap:10px}
+    .player-avatar{width:40px;height:40px;border-radius:9px;overflow:hidden;flex-shrink:0;background:rgba(127,119,221,0.15)}
+    .player-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+    .player-hero-name{font-size:13px;font-weight:600;color:var(--txt)}
+    .player-name{font-size:11px;color:var(--txt3);margin-top:2px}
+    .my-row .player-name{color:var(--accent-l);font-weight:600}
+
+    /* Level badge */
+    .level-badge{width:32px;height:32px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .level-badge svg{position:absolute;top:0;left:0;width:100%;height:100%;transform:rotate(-90deg)}
+    .level-badge .level-num{font-size:11px;font-weight:700;color:#c9a227;position:relative;z-index:1;line-height:1}
+
+    /* Items */
+    .items-row{display:flex;gap:3px;align-items:center}
+    .item-slot{width:42px;height:32px;border-radius:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);overflow:hidden;flex-shrink:0}
+    .item-slot img{width:100%;height:100%;object-fit:cover}
+    .item-slot.empty{opacity:1;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.12)}
+
+    /* Gold chart */
+    .chart-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:12px;box-shadow:var(--shadow)}
+    .chart-title{font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:4px}
+    .chart-tabs{display:flex;gap:6px;margin-bottom:16px}
+    .chart-tab{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;color:var(--txt3);border:1px solid var(--border);background:transparent;cursor:pointer;transition:background .15s,color .15s}
+    .chart-tab.active{background:var(--accent-bg);color:var(--accent-l);border-color:rgba(127,119,221,0.35)}
+
+    /* Responsive */
+    @media(max-width:900px){
+      .matches-table th:nth-child(n+6),.matches-table td:nth-child(n+6){display:none}
+      .players-table th:nth-child(n+5),.players-table td:nth-child(n+5){display:none}
+    }
+    @media(max-width:600px){
+      .page{padding-left:14px;padding-right:14px}
+      .navbar{padding:0 14px}
+      .nav-links{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="bg-grid"></div>
+
+<!-- Loading overlay -->
+<div class="lov" id="lov">
+  <div class="lov-spinner"></div>
+  <div style="font-size:14px;color:var(--txt2)" id="lov-text">Загружаем матчи...</div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/dashboard.html" class="nav-logo">
+    <svg width="34" height="34" viewBox="0 0 56 56" fill="none">
+      <defs>
+        <radialGradient id="mpg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient>
+        <radialGradient id="mgw" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7F77DD" stop-opacity="0.25"/><stop offset="100%" stop-color="#7F77DD" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="28" cy="28" r="27" fill="url(#mgw)"/>
+      <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.18)" stroke-width="0.6"/>
+      <circle cx="28" cy="6" r="2.2" fill="#AFA9EC"/><circle cx="50" cy="28" r="2.2" fill="#AFA9EC"/>
+      <circle cx="28" cy="50" r="2.2" fill="#AFA9EC"/><circle cx="6" cy="28" r="2.2" fill="#AFA9EC"/>
+      <circle cx="43.6" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/><circle cx="43.6" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+      <circle cx="12.4" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/><circle cx="12.4" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+      <line x1="28" y1="8.2" x2="42" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="44.8" y1="13" x2="48.2" y2="26" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="48.2" y1="30" x2="44.8" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="42" y1="43" x2="28" y2="47.8" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="14" y1="43" x2="7.8" y2="30" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="7.8" y1="26" x2="14" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="24" y1="47.8" x2="13" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <circle cx="28" cy="28" r="11" fill="url(#mpg)"/>
+      <ellipse cx="23.5" cy="23" rx="4.2" ry="2.8" fill="rgba(255,255,255,0.22)" transform="rotate(-30,23.5,23)"/>
+      <circle cx="28" cy="28" r="13.5" fill="none" stroke="rgba(175,169,236,0.28)" stroke-width="0.6"/>
+    </svg>
+    <span class="nav-logo-text">Mercury <span class="accent">DotAi</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="/dashboard.html" class="nav-link">Профиль</a>
+    <a href="/heroes.html"    class="nav-link">Герои</a>
+    <a href="/matches.html"   class="nav-link active">Матчи</a>
+    <a href="/ai.html"       class="nav-link">ИИ-анализ</a>
+    <a href="/compare.html"              class="nav-link">Сравнение</a>
+    <a href="/chat.html" class="nav-link">ИИ-чат</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <span style="font-size:13.5px;font-weight:500" id="nav-username">—</span>
+    <div class="nav-divider"></div>
+    <button class="nav-logout" onclick="handleLogout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Выйти
+    </button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Cache bar -->
+  <div class="cache-bar" id="cache-bar">
+    <span style="color:var(--txt3)">📦 Данные из кэша · обновлено <span id="cache-age">—</span></span>
+    <button class="refresh-btn" onclick="forceRefresh()">🔄 Обновить</button>
+  </div>
+
+  <!-- ===== LIST VIEW ===== -->
+  <div class="view active" id="view-list">
+    <div class="page-title">История матчей</div>
+    <div class="page-sub" id="matches-sub">Последние 20 матчей · нажми на строку чтобы открыть детали</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="filter-btn active" onclick="setFilter('all',this)">Все</button>
+      <button class="filter-btn" onclick="setFilter('full',this)">Только с данными</button>
+      <button class="filter-btn" onclick="setFilter('win',this)">Победы</button>
+      <button class="filter-btn" onclick="setFilter('lose',this)">Поражения</button>
+      <span style="font-size:12px;color:var(--txt3);margin-left:4px">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--win);margin-right:4px"></span>полные данные
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--txt4);margin-left:10px;margin-right:4px"></span>только результат
+      </span>
+    </div>
+
+    <div class="matches-table-wrap">
+      <table class="matches-table" id="matches-table">
+        <thead>
+          <tr>
+            <th class="th-nosort" style="width:220px">Герой</th>
+            <th onclick="sortBy('lane_role')">Роль <span class="sort-icon" id="si-lane_role"></span></th>
+            <th onclick="sortBy('result')">Результат <span class="sort-icon" id="si-result"></span></th>
+            <th onclick="sortBy('duration')">Время <span class="sort-icon" id="si-duration"></span></th>
+            <th onclick="sortBy('kda')">KDA <span class="sort-icon" id="si-kda"></span></th>
+            <th onclick="sortBy('hero_damage')">Урон <span class="sort-icon" id="si-hero_damage"></span></th>
+            <th onclick="sortBy('gold_per_min')">GPM <span class="sort-icon" id="si-gold_per_min"></span></th>
+            <th onclick="sortBy('xp_per_min')">XPM <span class="sort-icon" id="si-xp_per_min"></span></th>
+          </tr>
+        </thead>
+        <tbody id="matches-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+      <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Загрузить ещё</button>
+    </div>
+  </div>
+
+  <!-- ===== DETAIL VIEW ===== -->
+  <div class="view" id="view-detail">
+    <button class="back-btn" onclick="showList()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Назад к матчам
+    </button>
+
+    <div id="detail-content"></div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+//   CONSTANTS
+// =============================================
+const CDN   = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react';
+const ITEMS_CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items';
+// Role SVG icons (inline — always work, no CDN dependency)
+const ROLE_SVGS = {
+  1: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  2: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+  3: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  4: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  5: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+};
+const ROLE_COLORS = {1:'#4ade80',2:'#60a5fa',3:'#f87171',4:'#facc15',5:'#c084fc'};
+const ROLE_NAMES = {1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
+// Guess lane role by hero name
+const MID_HEROES    = ['invoker','storm spirit','queen of pain','shadow fiend','lina','puck','skywrath','tinker','zeus','ember spirit','outworld','void spirit','templar assassin','death prophet','arc warden'];
+const CARRY_HEROES  = ['anti-mage','juggernaut','phantom lancer','faceless void','morphling','spectre','terrorblade','luna','gyrocopter','medusa','drow ranger','sniper','slark','phantom assassin','clinkz','bloodseeker','ursa','weaver','lifestealer'];
+const OFF_HEROES    = ['axe','dragon knight','centaur','tidehunter','mars','underlord','night stalker','bristleback','dark seer','beastmaster','sand king','slardar','magnus','brew'];
+const SUPPORT_HEROES= ['crystal maiden','witch doctor','shadow shaman','warlock','jakiro','omniknight','dazzle','pugna','vengeful spirit','lich','disruptor','keeper','oracle','winter wyvern','ancient apparition'];
+const HARD_HEROES   = ['lion','shadow shaman','witch doctor','jakiro','lich','winter wyvern','techies','earth spirit','rubick'];
+
+function guessLaneRole(heroId) {
+  const h = heroMetaMap[heroId];
+  if (!h) return 0;
+  const n = h.name.toLowerCase();
+  if (HARD_HEROES.some(x => n.includes(x)))    return 5;
+  if (SUPPORT_HEROES.some(x => n.includes(x))) return 4;
+  if (MID_HEROES.some(x => n.includes(x)))     return 2;
+  if (CARRY_HEROES.some(x => n.includes(x)))   return 1;
+  if (OFF_HEROES.some(x => n.includes(x)))     return 3;
+  const attr = h.attr || '';
+  if (attr === 'str') return 3;
+  if (attr === 'agi') return 1;
+  return 4;
+}
+
+const GAME_MODES = {0:'Unknown',1:'All Pick',2:'Captains Mode',3:'Random Draft',4:'Single Draft',5:'All Random',22:'Ranked All Pick',23:'Turbo'};
+
+const CACHE_KEY = 'mercury_matches_cache';
+const CACHE_TTL = 20 * 60 * 1000; // 20 min
+
+// =============================================
+//   STATE
+// =============================================
+let allMatches   = [];   // all fetched matches
+let displayCount = 20;   // how many to show
+let sortField    = null;
+let matchFilter  = 'all';
+let sortAsc      = false;
+let heroMetaMap  = {};   // hero_id -> {name, img}
+let myId32       = null;
+let myLogin      = '';
+
+// =============================================
+//   HELPERS
+// =============================================
+function secToTime(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now()/1000 - ts));
+  if (diff < 3600)   return Math.floor(diff/60) + ' мин. назад';
+  if (diff < 86400)  return Math.floor(diff/3600) + ' ч. назад';
+  if (diff < 604800) return Math.floor(diff/86400) + ' дн. назад';
+  return new Date(ts*1000).toLocaleDateString('ru');
+}
+function isWin(m) { return (m.player_slot < 128) === m.radiant_win; }
+function kda(m) {
+  if (!m.deaths) return m.kills + m.assists > 0 ? 99 : 0;
+  return ((m.kills + m.assists) / m.deaths);
+}
+function kdaStr(m) {
+  const v = kda(m);
+  return v === 99 ? '∞' : v.toFixed(2);
+}
+function heroImg(heroId) {
+  const h = heroMetaMap[heroId];
+  return h ? `${CDN}/heroes/${h.img}.png` : '';
+}
+function heroName(heroId) {
+  return heroMetaMap[heroId]?.name || `Hero ${heroId}`;
+}
+
+// =============================================
+//   CACHE
+// =============================================
+function saveCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data})); } catch(e) {}
+}
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const {ts, data} = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return {ts, data};
+  } catch(e) { return null; }
+}
+function showCacheBar(ts) {
+  const bar = document.getElementById('cache-bar');
+  const age = document.getElementById('cache-age');
+  if (bar) bar.style.display = 'flex';
+  if (age) {
+    const mins = Math.round((Date.now()-ts)/60000);
+    age.textContent = mins < 1 ? 'только что' : mins + ' мин. назад';
+  }
+}
+
+function forceRefresh() {
+  localStorage.removeItem(CACHE_KEY);
+  allMatches = [];
+  displayCount = 20;
+  document.getElementById('cache-bar').style.display = 'none';
+  showLov('Обновляем матчи...');
+  init();
+}
+
+// =============================================
+//   LOADING OVERLAY
+// =============================================
+function showLov(text) {
+  const lov = document.getElementById('lov');
+  const lt  = document.getElementById('lov-text');
+  if (lov) { lov.style.display='flex'; lov.style.opacity='1'; }
+  if (lt && text) lt.textContent = text;
+}
+function hideLov() {
+  const lov = document.getElementById('lov');
+  if (lov) { lov.style.opacity='0'; setTimeout(()=>lov.style.display='none',400); }
+}
+
+// =============================================
+//   SORTING
+// =============================================
+function setFilter(f, btn) {
+  matchFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayCount = 20;
+  renderList();
+}
+
+function sortBy(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = false; }
+
+  // Update icons
+  document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '');
+  const si = document.getElementById(`si-${field}`);
+  if (si) si.textContent = sortAsc ? ' ↑' : ' ↓';
+  document.querySelectorAll('.matches-table th').forEach(th => th.classList.remove('sorted'));
+  const th = document.querySelector(`[onclick="sortBy('${field}')"]`);
+  if (th) th.classList.add('sorted');
+
+  renderList();
+}
+
+function hasFullData(m) {
+  return m.kills !== undefined && m.hero_damage !== undefined;
+}
+
+function getSorted() {
+  let arr = [...allMatches];
+
+  // Apply filter
+  if (matchFilter === 'full') arr = arr.filter(hasFullData);
+  else if (matchFilter === 'win')  arr = arr.filter(m => isWin(m));
+  else if (matchFilter === 'lose') arr = arr.filter(m => !isWin(m));
+
+  if (!sortField) return arr;
+  arr.sort((a, b) => {
+    let va, vb;
+    if (sortField === 'result')    { va = isWin(a)?1:0; vb = isWin(b)?1:0; }
+    else if (sortField === 'kda')  { va = kda(a); vb = kda(b); }
+    else                           { va = a[sortField]||0; vb = b[sortField]||0; }
+    return sortAsc ? va-vb : vb-va;
+  });
+  return arr;
+}
+
+// =============================================
+//   RENDER LIST
+// =============================================
+function renderList() {
+  const sorted = getSorted();
+  const shown  = sorted.slice(0, displayCount);
+  const tbody  = document.getElementById('matches-tbody');
+
+  tbody.innerHTML = shown.map(m => {
+    const win = isWin(m);
+    const img = heroImg(m.hero_id);
+    const name = heroName(m.hero_id);
+    const dmg = m.hero_damage ? Math.round(m.hero_damage).toLocaleString('ru') : '—';
+    const gpm = m.gold_per_min || '—';
+    const xpm = m.xp_per_min  || '—';
+
+    const hasFull = hasFullData(m);
+    return `<tr class="${win?'win-row':'lose-row'}${hasFull?'':' no-data'}" onclick="openMatch(${m.match_id})" title="${hasFull?'':'Полные данные доступны при открытии матча'}">
+      <td>
+        <div class="hero-cell">
+          <div class="hero-icon-sm">
+            ${img ? `<img src="${img}" alt="${name}" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div class="hero-info">
+            <div class="hero-name">${name}</div>
+            <div class="match-time">${timeAgo(m.start_time)}</div>
+          </div>
+        </div>
+      </td>
+           <td>
+        ${(() => {
+          const role = m.lane_role || guessLaneRole(m.hero_id);
+          return role
+            ? `<div style="display:flex;align-items:center;gap:6px;color:#e8e6f8;font-size:12px;font-weight:500"><span style="display:flex;align-items:center;flex-shrink:0">${ROLE_SVGS[role]}</span><span>${ROLE_NAMES[role]}</span></div>`
+            : '<span style="color:var(--txt4)">—</span>';
+        })()}
+      </td>
+      <td><span class="result-badge ${win?'win':'lose'}">${win?'Победа':'Поражение'}</span></td>
+      <td class="duration-cell">${secToTime(m.duration)}</td>
+      <td class="kda-cell"><span class="kda-val">${kdaStr(m)}</span><span style="font-size:11px">${m.kills}/${m.deaths}/${m.assists}</span></td>
+      <td class="num-cell">${dmg}</td>
+      <td class="num-cell">${gpm}</td>
+      <td class="num-cell">${xpm}</td>
+    </tr>`;
+  }).join('');
+
+  // Load more button
+  const wrap = document.getElementById('load-more-wrap');
+  const btn  = document.getElementById('load-more-btn');
+  if (allMatches.length > displayCount) {
+    wrap.style.display = 'flex';
+    btn.disabled = false;
+    btn.textContent = `Загрузить ещё (${allMatches.length - displayCount} осталось)`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function loadMore() {
+  displayCount += 10;
+  renderList();
+}
+
+// =============================================
+//   MATCH DETAIL
+// =============================================
+async function openMatch(matchId) {
+  showLov('Загружаем детали матча...');
+  showView('detail');
+
+  // Wait for item names if not ready yet
+  if (!window.itemNamesReady) {
+    try {
+      const iRes = await fetch('https://api.opendota.com/api/constants/items');
+      if (iRes.ok) {
+        const items = await iRes.json();
+        window.itemNames = {};
+        Object.entries(items).forEach(([name, data]) => {
+          if (data && data.id !== undefined) {
+            window.itemNames[data.id] = name.replace(/^item_/, '');
+          }
+        });
+        window.itemNamesReady = true;
+      }
+    } catch(e) {}
+  }
+
+  window._currentMatchId = matchId;
+  try {
+    const res = await fetch(`https://api.opendota.com/api/matches/${matchId}`);
+    if (!res.ok) throw new Error('not ok');
+    const m = await res.json();
+    renderDetail(m);
+  } catch(e) {
+    document.getElementById('detail-content').innerHTML = `
+      <div style="color:var(--txt3);font-size:14px;padding:40px 0">
+        Не удалось загрузить данные матча. Попробуйте позже.
+      </div>`;
+  }
+  hideLov();
+}
+
+function renderDetail(m) {
+  const radiant = (m.players||[]).filter(p => p.player_slot < 128);
+  const dire    = (m.players||[]).filter(p => p.player_slot >= 128);
+  const winner  = m.radiant_win ? 'Radiant' : 'Dire';
+  const dur     = secToTime(m.duration);
+  const mode    = GAME_MODES[m.game_mode] || 'Unknown';
+  const ago     = timeAgo(m.start_time);
+
+  function playerRow(p) {
+    const isMe = p.account_id === myId32;
+    const img  = heroImg(p.hero_id);
+    const name = heroName(p.hero_id);
+    const pname = p.personaname || (isMe ? myLogin : 'Anonymous');
+    const dmg  = p.hero_damage ? Math.round(p.hero_damage/1000).toFixed(1)+'k' : '—';
+    const net  = p.net_worth ? Math.round(p.net_worth/1000).toFixed(1)+'k' : '—';
+    const items = [p.item_0,p.item_1,p.item_2,p.item_3,p.item_4,p.item_5];
+
+    // item names from OpenDota
+    // Items: OpenDota gives item IDs, need to map to names
+    // Use items API endpoint format
+    const itemSlots = items.map(id => {
+      if (!id) return '<div class="item-slot empty"></div>';
+      const name = window.itemNames && window.itemNames[id];
+      if (!name) return '<div class="item-slot empty"></div>';
+      const imgUrl = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/' + name + '.png';
+      return '<div class="item-slot" title="' + name + '"><img src="' + imgUrl + '" alt="' + name + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.style.opacity=0.3;this.remove()"></div>';
+    }).join('');
+
+    return `<tr class="${isMe?'my-row':''}">
+      <td>
+        <div class="player-hero">
+          <div class="player-avatar">
+            ${img?`<img src="${img}" alt="${name}" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div>
+            <div class="player-hero-name">${name}</div>
+            <div class="player-name">${pname}</div>
+          </div>
+        </div>
+      </td>
+      <td>${(() => {
+        const lvl = p.level || 0;
+        const max = 30;
+        const r = 13;
+        const circ = 2 * Math.PI * r;
+        const filled = (lvl / max) * circ;
+        return `<div class="level-badge">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="${r}" stroke="#2a2040" stroke-width="2.5"/>
+            <circle cx="16" cy="16" r="${r}" stroke="#c9a227" stroke-width="2.5"
+              stroke-dasharray="${filled} ${circ}"
+              stroke-linecap="round"/>
+          </svg>
+          <span class="level-num">${lvl||'?'}</span>
+        </div>`;
+      })()}</td>
+      <td style="color:var(--txt)">${p.kills}/${p.deaths}/${p.assists}</td>
+      <td style="font-size:11px">${p.last_hits||0}/${p.denies||0}</td>
+      <td style="color:var(--txt)">${p.gold_per_min||0}</td>
+      <td style="color:var(--txt)">${p.xp_per_min||0}</td>
+      <td>${dmg}</td>
+      <td>${net}</td>
+      <td><div class="items-row">${itemSlots}</div></td>
+    </tr>`;
+  }
+
+  function teamTable(players, side) {
+    return `
+      <div class="team-section">
+        <div class="team-header ${side}">${side === 'radiant' ? 'Radiant' : 'Dire'}</div>
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th style="width:200px">Герой / Игрок</th>
+              <th>Ур.</th>
+              <th>K/D/A</th>
+              <th>LH/DN</th>
+              <th>GPM</th>
+              <th>XPM</th>
+              <th>Урон</th>
+              <th>Нетворс</th>
+              <th>Предметы</th>
+            </tr>
+          </thead>
+          <tbody>${players.map(playerRow).join('')}</tbody>
+        </table>
+      </div>`;
+  }
+
+  // Gold/XP advantage chart data
+  const goldAdv = m.radiant_gold_adv || [];
+  const xpAdv   = m.radiant_xp_adv   || [];
+  const labels  = goldAdv.map((_,i) => Math.floor(i/2) + ':' + (i%2===0?'00':'30'));
+
+  document.getElementById('detail-content').innerHTML = `
+    <!-- Header -->
+    <div class="match-header" style="text-align:center">
+      <div style="display:flex;align-items:center;justify-content:center;gap:56px;margin-bottom:20px">
+        <div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:1.5px;color:var(--win);margin-bottom:8px">RADIANT</div>
+          <div style="font-size:60px;font-weight:900;line-height:1;color:var(--win)">${m.radiant_score||0}</div>
+        </div>
+        <div>
+          <div class="match-winner-badge">${winner} победил</div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:1.5px;color:var(--lose);margin-bottom:8px">DIRE</div>
+          <div style="font-size:60px;font-weight:900;line-height:1;color:var(--lose)">${m.dire_score||0}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
+          <span class="meta-tag" style="font-size:13px;color:var(--txt);border-color:rgba(255,255,255,0.15)">${dur}</span>
+          <span style="font-size:13px;font-weight:500;color:var(--txt)">${mode}</span>
+          <span style="font-size:13px;font-weight:500;color:var(--txt)">${ago}</span>
+          <span style="font-size:13px;font-weight:500;color:var(--txt)">#${m.match_id}</span>
+        </div>
+      </div>
+    </div>
+
+        <!-- Teams -->
+    ${teamTable(radiant, 'radiant')}
+    ${teamTable(dire,    'dire')}
+
+    <!-- Chart -->
+    <div class="chart-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="chart-title">Преимущество по золоту и опыту</div>
+        <div style="display:flex;gap:16px;font-size:12px;align-items:center">
+          <span style="color:#facc15;font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:20px;height:2px;background:#facc15;display:inline-block;border-radius:2px"></span>Золото</span>
+          <span style="color:#60a5fa;font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:20px;height:2px;background:#60a5fa;display:inline-block;border-radius:2px"></span>Опыт</span>
+          <span style="color:var(--win);font-weight:600;margin-left:8px">▲ Radiant</span>
+          <span style="color:var(--lose);font-weight:600">▼ Dire</span>
+        </div>
+      </div>
+      <div id="chart-no-data" style="display:none;text-align:center;padding:32px;color:var(--txt3);font-size:13px">
+        <div style="margin-bottom:12px">📊 График недоступен — матч не распарсен</div>
+        <button id="parse-btn" onclick="requestParse()" style="background:var(--accent-bg);border:1px solid rgba(127,119,221,0.3);border-radius:8px;padding:8px 20px;font-size:13px;color:var(--accent-l);cursor:pointer;font-family:inherit;transition:background .15s">
+          Запросить парсинг
+        </button>
+        <div id="parse-status" style="margin-top:10px;font-size:12px;color:var(--txt3)"></div>
+      </div>
+      <canvas id="adv-chart" height="110"></canvas>
+    </div>
+  `;
+
+  // Render chart
+  window._goldAdv = goldAdv;
+  window._xpAdv   = xpAdv;
+  window._chartLabels = labels;
+  renderAdvChart('both');
+}
+
+let advChartInst = null;
+async function requestParse() {
+  const btn = document.getElementById('parse-btn');
+  const status = document.getElementById('parse-status');
+  const matchId = window._currentMatchId;
+  if (!matchId) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Отправляем запрос...';
+  try {
+    const res = await fetch(`https://api.opendota.com/api/request/${matchId}`, { method: 'POST' });
+    if (res.ok) {
+      status.textContent = '✓ Запрос отправлен! Обновите страницу через 1-2 минуты.';
+      status.style.color = 'var(--win)';
+      btn.textContent = 'Запрос отправлен';
+    } else {
+      throw new Error('failed');
+    }
+  } catch(e) {
+    status.textContent = '✗ Не удалось отправить запрос';
+    status.style.color = 'var(--lose)';
+    btn.disabled = false;
+    btn.textContent = 'Попробовать снова';
+  }
+}
+
+function renderAdvChart(mode) {
+  const ctx = document.getElementById('adv-chart');
+  if (!ctx) return;
+  if (advChartInst) { advChartInst.destroy(); advChartInst = null; }
+
+  const gold = window._goldAdv || [];
+  const xp   = window._xpAdv   || [];
+
+  const noDataEl = document.getElementById('chart-no-data');
+  if (!gold.length && !xp.length) {
+    if (noDataEl) noDataEl.style.display = 'block';
+    ctx.style.display = 'none';
+    return;
+  }
+  if (noDataEl) noDataEl.style.display = 'none';
+  ctx.style.display = 'block';
+
+  const lbl  = window._chartLabels || [];
+
+  // Always show both gold (yellow) and xp (blue)
+  const datasets = [
+    {
+      label: 'Золото',
+      data: gold,
+      borderColor: '#facc15',
+      backgroundColor: 'rgba(250,204,21,0)',
+      fill: false, tension: 0.3,
+      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+    },
+    {
+      label: 'Опыт',
+      data: xp,
+      borderColor: '#60a5fa',
+      backgroundColor: 'rgba(96,165,250,0)',
+      fill: false, tension: 0.3,
+      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+    },
+  ];
+
+  // Build time labels in MM:SS format (data is per 1-minute intervals)
+  const totalPoints = (window._goldAdv||[]).length;
+  const timeLabels = Array.from({length: totalPoints}, (_, i) => {
+    const mins = i;
+    return `${mins}:00`;
+  });
+
+  advChartInst = new Chart(ctx, {
+    type: 'line',
+    data: { labels: timeLabels, datasets },
+    plugins: [{
+      id: 'splitBackground',
+      beforeDraw(chart) {
+        const {ctx: c, chartArea: {top, bottom, left, right}, scales: {y}} = chart;
+        if (!y) return;
+        const zeroY = y.getPixelForValue(0);
+        c.save();
+        // Green above zero (Radiant)
+        c.fillStyle = 'rgba(74,222,128,0.07)';
+        c.fillRect(left, top, right-left, zeroY-top);
+        // Red below zero (Dire)
+        c.fillStyle = 'rgba(248,113,113,0.07)';
+        c.fillRect(left, zeroY, right-left, bottom-zeroY);
+        c.restore();
+      }
+    }],
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor:'#0f1420', borderColor:'rgba(127,119,221,0.3)', borderWidth:1,
+          titleColor:'#AFA9EC', bodyColor:'#e8e6f8',
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => {
+              const v = ctx.parsed.y;
+              const who = v >= 0 ? 'Radiant' : 'Dire';
+              return ` ${who} +${Math.abs(Math.round(v)).toLocaleString('ru')}`;
+            }
+          }
+        },
+        annotation: {}
+      },
+      scales: {
+        x: {
+          ticks:{color:'#5f5c80',font:{size:10},maxTicksLimit:12},
+          grid:{color:'rgba(255,255,255,0.04)'}
+        },
+        y: {
+          ticks:{color:'#5f5c80',font:{size:10}, callback: v => v >= 0 ? '+'+Math.round(v/1000)+'k' : Math.round(v/1000)+'k'},
+          grid:{color: ctx => ctx.tick.value === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.04)'},
+          border:{dash: ctx => ctx.tick.value === 0 ? [] : [4,4]}
+        }
+      }
+    }
+  });
+
+  // Add Radiant/Dire labels on chart
+  const chartCanvas = ctx;
+  chartCanvas.style.position = 'relative';
+}
+
+
+
+// =============================================
+//   VIEW SWITCHING
+// =============================================
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`view-${v}`).classList.add('active');
+}
+function showList() {
+  if (advChartInst) { advChartInst.destroy(); advChartInst = null; }
+  showView('list');
+}
+
+// =============================================
+//   INIT
+// =============================================
+function handleLogout() {
+  localStorage.clear();
+  window.location.href = '/index.html';
+}
+
+async function init() {
+  const token   = localStorage.getItem('token');
+  const userRaw = localStorage.getItem('user');
+  const steamId = localStorage.getItem('steam_id');
+  if (!token || !userRaw) { window.location.href = '/index.html'; return; }
+
+  const user = JSON.parse(userRaw);
+  myLogin = user.login;
+  document.getElementById('nav-username').textContent = user.login;
+  const navAv = document.getElementById('nav-avatar');
+const steamAv = localStorage.getItem('steam_avatar');
+if (navAv) {
+  if (steamAv) {
+    navAv.innerHTML = `<img src="${steamAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    navAv.style.background = 'none';
+    navAv.style.overflow = 'hidden';
+    navAv.style.padding = '0';
+  } else if (user.login) {
+    navAv.textContent = user.login.slice(0,2).toUpperCase();
+  }
+}
+
+
+  if (steamId) {
+    myId32 = Number(BigInt(steamId) - 76561197960265728n);
+  }
+
+  // Load hero meta + item names in parallel
+  try {
+    const [hRes, iRes] = await Promise.all([
+      fetch('https://api.opendota.com/api/heroes'),
+      fetch('https://api.opendota.com/api/constants/items'),
+    ]);
+    if (hRes.ok) {
+      const heroes = await hRes.json();
+      heroes.forEach(h => {
+        heroMetaMap[h.id] = {
+          name: h.localized_name,
+          img: (h.name||'').replace('npc_dota_hero_','')
+        };
+      });
+    }
+    if (iRes.ok) {
+      const items = await iRes.json();
+      window.itemNames = {};
+      Object.entries(items).forEach(([name, data]) => {
+        if (data && data.id !== undefined) {
+          const cleanName = name.replace(/^item_/, '');
+          window.itemNames[data.id] = cleanName;
+        }
+      });
+      window.itemNamesReady = true;
+      console.log('Items loaded:', Object.keys(window.itemNames).length, 'sample:', window.itemNames[32]);
+    }
+  } catch(e) {}
+
+  // Check cache
+  const cached = loadCache();
+  if (cached) {
+    allMatches = cached.data;
+    renderList();
+    hideLov();
+    showCacheBar(cached.ts);
+    return;
+  }
+
+  // Fetch matches
+  try {
+    // recentMatches = last 20 with full stats (kills/deaths/damage etc)
+    // matches = all matches but minimal fields (only duration/game_mode/result)
+    // Strategy: load all matches for history, enrich first 20 from recentMatches
+    const [recentRes, allRes] = await Promise.all([
+      fetch(`https://api.opendota.com/api/players/${myId32}/recentMatches`),
+      fetch(`https://api.opendota.com/api/players/${myId32}/matches`),
+    ]);
+
+    const recent = recentRes.ok ? await recentRes.json() : [];
+    const all    = allRes.ok    ? await allRes.json()    : [];
+
+    // Build lookup from recent (has full fields)
+    const recentMap = {};
+    recent.forEach(m => recentMap[m.match_id] = m);
+
+    // Merge: use recent data where available, fall back to all
+    const recentIds = new Set(recent.map(m => m.match_id));
+    const extra = all.filter(m => !recentIds.has(m.match_id));
+
+    // Final list: recent first (full data), then the rest
+    allMatches = [...recent, ...extra];
+
+    document.getElementById('matches-sub').textContent =
+      `${allMatches.length} матчей · первые 20 с полной статистикой · нажми на строку для деталей`;
+
+    saveCache(allMatches);
+    showCacheBar(Date.now());
+    renderList();
+  } catch(e) {
+    document.getElementById('matches-sub').textContent = 'Ошибка загрузки. OpenDota недоступен.';
+  }
+
+  hideLov();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

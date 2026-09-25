@@ -1,0 +1,84 @@
+/* =============================================
+   Mercury DotAi — CSS Variables & Global Styles
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Russo+One&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* === Colours === */
+  --bg-primary:       #0d1117;
+  --bg-secondary:     #111520;
+  --bg-card:          #0d1117;
+  --bg-hover:         rgba(255, 255, 255, 0.03);
+
+  --border:           rgba(127, 119, 221, 0.2);
+  --border-subtle:    rgba(255, 255, 255, 0.06);
+
+  --accent:           #7F77DD;
+  --accent-light:     #AFA9EC;
+  --accent-dark:      #534AB7;
+  --accent-bg:        rgba(127, 119, 221, 0.12);
+  --accent-bg-hover:  rgba(127, 119, 221, 0.2);
+
+  --win:              #1D9E75;
+  --win-bg:           rgba(29, 158, 117, 0.12);
+  --win-border:       rgba(29, 158, 117, 0.3);
+
+  --lose:             #E24B4A;
+  --lose-bg:          rgba(226, 75, 74, 0.1);
+  --lose-border:      rgba(226, 75, 74, 0.25);
+
+  --warn:             #EF9F27;
+  --warn-bg:          rgba(239, 159, 39, 0.12);
+
+  --text-primary:     #e8e6f0;
+  --text-secondary:   #8b8fa8;
+  --text-muted:       #5a5e72;
+  --text-faint:       #3a3d4a;
+
+  /* === Typography === */
+  --font-logo:    'Oxanium', sans-serif;
+  --font-heading: 'Russo One', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* === Radius === */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+
+  /* === Shadows === */
+  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow:  0 0 40px rgba(127, 119, 221, 0.15);
+}
+
+/* === Reset === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: rgba(127, 119, 221, 0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(127, 119, 221, 0.5); }
+
+/* === Utilities === */
+.text-win   { color: var(--win); }
+.text-lose  { color: var(--lose); }
+.text-accent{ color: var(--accent-light); }
+.text-muted { color: var(--text-muted); }
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: var(--font-body); border: none; outline: none; }
+input  { font-family: var(--font-body); outline: none; }

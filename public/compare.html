@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury DotAi — Сравнение</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:#080b11;--bg-card:#0f1420;--bg-hover:#141929;
+      --border:rgba(127,119,221,0.18);--border-sub:rgba(255,255,255,0.06);
+      --accent:#7F77DD;--accent-l:#AFA9EC;--accent-bg:rgba(127,119,221,0.1);
+      --win:#4ade80;--lose:#f87171;--txt:#e8e6f8;--txt2:#9994c0;--txt3:#5f5c80;--txt4:#3a3760;
+      --r-md:10px;--r-lg:16px;--nav-h:68px;--shadow:0 4px 24px rgba(0,0,0,0.4);
+      --p1:#60a5fa;--p2:#f87171;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;font-family:inherit;border:none;background:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:0.09;pointer-events:none;z-index:0}
+    .o1{width:600px;height:600px;background:#534AB7;top:-150px;left:-150px}
+    .o2{width:450px;height:450px;background:#3C3489;bottom:-100px;right:-100px}
+    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-image:linear-gradient(rgba(127,119,221,0.03)1px,transparent 1px),
+      linear-gradient(90deg,rgba(127,119,221,0.03)1px,transparent 1px);background-size:60px 60px}
+
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);
+      background:rgba(8,11,17,0.85);backdrop-filter:blur(18px);
+      border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px}
+    .nav-logo{display:flex;align-items:center;gap:11px;flex-shrink:0;transition:opacity .2s;text-decoration:none}
+    .nav-logo:hover{opacity:.85}
+    .nav-logo-text{font-size:17px;font-weight:600;color:var(--txt)}
+    .nav-logo-text .accent{color:var(--accent-l)}
+    .nav-links{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+    .nav-link{padding:7px 16px;border-radius:var(--r-md);font-size:13.5px;font-weight:500;color:var(--txt2);transition:background .2s,color .2s;text-decoration:none}
+    .nav-link:hover{background:rgba(255,255,255,0.05);color:var(--txt)}
+    .nav-link.active{background:var(--accent-bg);color:var(--accent-l);border:1px solid rgba(127,119,221,0.22)}
+    .nav-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#534AB7,#7F77DD);
+      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;border:1.5px solid rgba(127,119,221,0.35)}
+    .nav-divider{width:1px;height:22px;background:var(--border)}
+    .nav-logout{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r-md);
+      font-size:13px;font-weight:500;color:var(--lose);border:1px solid rgba(248,113,113,0.22);background:rgba(248,113,113,0.06)}
+    .nav-logout:hover{background:rgba(248,113,113,0.12)}
+
+    .page{position:relative;z-index:1;padding-top:calc(var(--nav-h)+32px);padding-bottom:60px;
+      max-width:1000px;margin:0 auto;padding-left:24px;padding-right:24px}
+
+    .page-header{margin-bottom:28px;animation:fadeUp .4s ease;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .page-title{font-size:24px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+    .page-title-icon{width:32px;height:32px;background:var(--accent-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .page-sub{font-size:14px;color:var(--txt3)}
+
+    .reset-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-md);font-size:13px;font-weight:500;color:var(--accent-l);border:1px solid rgba(127,119,221,0.3);background:var(--accent-bg);cursor:pointer;white-space:nowrap;transition:background .15s}
+    .reset-btn:hover{background:rgba(127,119,221,0.18)}
+
+    /* PLAYER PANELS */
+    .players-row{display:grid;grid-template-columns:1fr 80px 1fr;gap:16px;margin-bottom:20px;animation:fadeUp .4s ease .05s both;align-items:stretch}
+
+    .player-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+    .player-panel.p1{border-color:rgba(96,165,250,0.3)}
+    .player-panel.p2{border-color:rgba(248,113,113,0.3)}
+
+    .player-top{display:flex;align-items:center;gap:14px}
+    .player-avatar{width:56px;height:56px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+    .player-avatar img{width:100%;height:100%;object-fit:cover}
+    .player-avatar.p1{background:rgba(96,165,250,0.15);border:2px solid rgba(96,165,250,0.35)}
+    .player-avatar.p2{background:rgba(248,113,113,0.15);border:2px solid rgba(248,113,113,0.35)}
+    .player-name{font-size:16px;font-weight:700;color:var(--txt)}
+    .player-rank{font-size:12px;color:var(--txt3);margin-top:3px}
+    .player-steam{font-size:11px;color:var(--txt4);margin-top:2px;font-family:monospace}
+
+    .player-color-line{height:3px;border-radius:2px;margin-top:auto}
+    .p1 .player-color-line{background:linear-gradient(90deg,var(--p1),transparent)}
+    .p2 .player-color-line{background:linear-gradient(90deg,transparent,var(--p2))}
+
+    .player-input-wrap{position:relative}
+    .player-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);
+      border-radius:var(--r-md);padding:10px 40px 10px 13px;font-size:13px;color:var(--txt);outline:none;transition:border-color .2s;font-family:inherit}
+    .player-input::placeholder{color:var(--txt4)}
+    .player-input:focus{border-color:rgba(248,113,113,0.5);box-shadow:0 0 0 3px rgba(248,113,113,0.08)}
+    .input-check{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:12px}
+    .input-check.ready{display:flex;background:rgba(74,222,128,0.15);color:var(--win)}
+
+    .vs-center{display:flex;align-items:center;justify-content:center}
+    .vs-badge{width:52px;height:52px;border-radius:50%;background:rgba(127,119,221,0.12);border:1px solid rgba(127,119,221,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--accent-l)}
+
+    .compare-btn{width:100%;padding:13px;border-radius:var(--r-md);font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,#534AB7,#7F77DD);border:none;cursor:pointer;transition:opacity .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;animation:fadeUp .4s ease .1s both}
+    .compare-btn:hover{opacity:.9}
+    .compare-btn:active{transform:scale(.99)}
+    .compare-btn:disabled{opacity:.5;cursor:default}
+    .btn-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    .compare-btn.loading .btn-spinner{display:block}
+    .compare-btn.loading .btn-label{display:none}
+
+    /* CACHE BAR */
+    .cache-bar{display:none;align-items:center;justify-content:space-between;background:rgba(127,119,221,0.07);border:1px solid rgba(127,119,221,0.2);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:13px}
+    .cache-bar.visible{display:flex}
+
+    .error-msg{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--r-md);padding:12px 16px;font-size:13px;color:var(--lose);margin-bottom:16px;display:none}
+
+    /* WINNER */
+    .winner-banner{border-radius:var(--r-lg);padding:20px 24px;margin-bottom:20px;text-align:center;box-shadow:var(--shadow)}
+    .winner-label{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+    .winner-name{font-size:22px;font-weight:800;margin-bottom:3px}
+    .winner-desc{font-size:13px;color:var(--txt3)}
+
+    /* COMPARE TABLE */
+    .compare-table{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px}
+
+    /* Header with avatars */
+    .ct-header{display:grid;grid-template-columns:1fr 160px 1fr;border-bottom:1px solid var(--border)}
+    .ct-hcell{padding:14px 20px;font-size:13px;font-weight:700;background:rgba(255,255,255,0.02)}
+    .ct-hcell.p1h{color:var(--p1);text-align:right}
+    .ct-hcell.midh{color:var(--txt3);text-align:center;border-left:1px solid var(--border-sub);border-right:1px solid var(--border-sub)}
+    .ct-hcell.p2h{color:var(--p2);text-align:left}
+
+    .ct-hcell-inner{display:flex;align-items:center;gap:10px}
+    .ct-hcell-inner.right{flex-direction:row-reverse}
+    .ct-hav{width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+    .ct-hav img{width:100%;height:100%;object-fit:cover}
+    .ct-hav.p1av{background:rgba(96,165,250,0.2);border:1.5px solid rgba(96,165,250,0.4);color:var(--p1)}
+    .ct-hav.p2av{background:rgba(248,113,113,0.2);border:1.5px solid rgba(248,113,113,0.4);color:var(--p2)}
+
+    .ct-section{padding:9px 20px;font-size:11px;font-weight:700;color:#e8e6f8;letter-spacing:0.8px;text-transform:uppercase;background:rgba(127,119,221,0.08);border-bottom:1px solid var(--border-sub);border-top:1px solid var(--border-sub)}
+
+    .ct-row{display:grid;grid-template-columns:1fr 160px 1fr;border-bottom:1px solid var(--border-sub);transition:background .15s}
+    .ct-row:last-child{border-bottom:none}
+    .ct-row:hover{background:var(--bg-hover)}
+
+    .ct-cell{padding:14px 20px}
+    .ct-cell.p1c{text-align:right}
+    .ct-cell.p2c{text-align:left}
+    .ct-cell.midc{text-align:center;border-left:1px solid var(--border-sub);border-right:1px solid var(--border-sub);display:flex;align-items:center;justify-content:center}
+    .ct-label{font-size:12px;font-weight:600;color:var(--txt2);white-space:nowrap}
+
+    .ct-val{font-size:16px;font-weight:700;color:var(--txt2);transition:all .3s;margin-bottom:6px}
+    .ct-val.winner-p1{color:var(--p1);text-shadow:0 0 14px rgba(96,165,250,0.7),0 0 28px rgba(96,165,250,0.35)}
+    .ct-val.winner-p2{color:var(--p2);text-shadow:0 0 14px rgba(248,113,113,0.7),0 0 28px rgba(248,113,113,0.35)}
+
+    .bar-wrap{height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;margin-top:6px}
+    .bar-fill-p1{height:100%;border-radius:2px;background:var(--p1);transition:width .6s ease}
+    .bar-fill-p2{height:100%;border-radius:2px;background:var(--p2);transition:width .6s ease}
+
+    /* RADAR CHARTS */
+    .radar-section{margin-bottom:16px}
+    .radar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;box-shadow:var(--shadow)}
+    .radar-title{font-size:13px;font-weight:700;color:var(--txt2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .radar-legend{display:flex;gap:16px;margin-top:12px;justify-content:center}
+    .radar-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt3)}
+    .radar-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+    #results{display:none}
+    #results.visible{display:block;animation:fadeUp .4s ease}
+
+    @media(max-width:650px){.players-row{grid-template-columns:1fr}.vs-center{display:none}}
+  </style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div><div class="bg-grid"></div>
+
+<nav class="navbar">
+  <a href="/dashboard.html" class="nav-logo">
+    <svg width="34" height="34" viewBox="0 0 56 56" fill="none">
+      <defs>
+        <radialGradient id="cpg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient>
+        <radialGradient id="cgw" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7F77DD" stop-opacity="0.25"/><stop offset="100%" stop-color="#7F77DD" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="28" cy="28" r="27" fill="url(#cgw)"/>
+      <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.18)" stroke-width="0.6"/>
+      <circle cx="28" cy="6" r="2.2" fill="#AFA9EC"/><circle cx="50" cy="28" r="2.2" fill="#AFA9EC"/>
+      <circle cx="28" cy="50" r="2.2" fill="#AFA9EC"/><circle cx="6" cy="28" r="2.2" fill="#AFA9EC"/>
+      <circle cx="43.6" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/><circle cx="43.6" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/>
+      <circle cx="12.4" cy="44.6" r="1.6" fill="#7F77DD" opacity="0.85"/><circle cx="12.4" cy="11.4" r="1.6" fill="#7F77DD" opacity="0.85"/>
+      <line x1="28" y1="8.2" x2="42" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="44.8" y1="13" x2="48.2" y2="26" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="48.2" y1="30" x2="44.8" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="42" y1="43" x2="28" y2="47.8" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="14" y1="43" x2="7.8" y2="30" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="7.8" y1="26" x2="14" y2="13" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <line x1="24" y1="47.8" x2="13" y2="43" stroke="rgba(127,119,221,0.5)" stroke-width="0.7" stroke-linecap="round"/>
+      <circle cx="28" cy="28" r="11" fill="url(#cpg)"/>
+      <ellipse cx="23.5" cy="23" rx="4.2" ry="2.8" fill="rgba(255,255,255,0.22)" transform="rotate(-30,23.5,23)"/>
+      <circle cx="28" cy="28" r="13.5" fill="none" stroke="rgba(175,169,236,0.28)" stroke-width="0.6"/>
+    </svg>
+    <span class="nav-logo-text">Mercury <span class="accent">DotAi</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="/dashboard.html" class="nav-link">Профиль</a>
+    <a href="/heroes.html"    class="nav-link">Герои</a>
+    <a href="/matches.html"   class="nav-link">Матчи</a>
+    <a href="/ai.html"        class="nav-link">ИИ-анализ</a>
+    <a href="/compare.html"   class="nav-link active">Сравнение</a>
+    <a href="/chat.html" class="nav-link">ИИ-чат</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <span style="font-size:13.5px;font-weight:500" id="nav-username">—</span>
+    <div class="nav-divider"></div>
+    <button class="nav-logout" onclick="handleLogout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Выйти
+    </button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title"><div class="page-title-icon">⚔️</div>Сравнение игроков</div>
+      <div class="page-sub">Сравните статистику двух игроков Dota 2 по ключевым метрикам</div>
+    </div>
+
+  </div>
+
+  <div class="players-row">
+    <div class="player-panel p1">
+      <div class="player-top">
+        <div class="player-avatar p1" id="av1">?</div>
+        <div>
+          <div class="player-name" id="name1">Вы</div>
+          <div class="player-rank" id="rank1">—</div>
+          <div class="player-steam" id="steam1">—</div>
+        </div>
+      </div>
+      <div class="player-color-line"></div>
+    </div>
+
+    <div class="vs-center"><div class="vs-badge">VS</div></div>
+
+    <div class="player-panel p2">
+      <div class="player-top">
+        <div class="player-avatar p2" id="av2">?</div>
+        <div>
+          <div class="player-name" id="name2">Противник</div>
+          <div class="player-rank" id="rank2">Введите Steam ID ниже</div>
+        </div>
+      </div>
+      <div>
+        <div class="player-input-wrap">
+          <input type="text" class="player-input" id="input-p2" placeholder="76561198XXXXXXXXX" oninput="onInput2()">
+          <div class="input-check" id="check2">✓</div>
+        </div>
+      </div>
+      <div class="player-color-line"></div>
+    </div>
+  </div>
+
+  <div class="cache-bar" id="cache-bar">
+    <span style="color:var(--txt3)">📦 Данные из кэша · <span id="cache-age">—</span></span>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <button class="compare-btn" id="compare-btn" onclick="compare()">
+    <div class="btn-spinner"></div>
+    <span class="btn-label">⚔️ Сравнить</span>
+  </button>
+  <button class="reset-btn" id="reset-btn" onclick="resetCompare()" style="display:none;width:100%;padding:13px;border-radius:var(--r-md);font-size:14px;font-weight:600;justify-content:center;margin-bottom:20px">
+    🔄 Сбросить и сравнить другого
+  </button>
+
+  <div id="results">
+
+    <div class="winner-banner" id="winner-banner">
+      <div class="winner-label">Лидер по статистике</div>
+      <div class="winner-name" id="winner-name">—</div>
+      <div class="winner-desc" id="winner-desc">—</div>
+    </div>
+
+    <div class="compare-table">
+      <div class="ct-header">
+        <div class="ct-hcell p1h">
+          <div class="ct-hcell-inner right">
+            <div class="ct-hav p1av" id="hdr-av1">?</div>
+            <span id="hdr1">Вы</span>
+          </div>
+        </div>
+        <div class="ct-hcell midh">Метрика</div>
+        <div class="ct-hcell p2h">
+          <div class="ct-hcell-inner">
+            <div class="ct-hav p2av" id="hdr-av2">?</div>
+            <span id="hdr2">Противник</span>
+          </div>
+        </div>
+      </div>
+      <div id="table-body"></div>
+    </div>
+
+    <!-- RADAR CHARTS by section -->
+    <div id="radars" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px"></div>
+
+  </div>
+</div>
+
+<script>
+const CACHE_KEY = 'mercury_compare_cache';
+const CACHE_TTL = 20 * 60 * 1000;
+let heroMetaMap = {};
+let radarCharts = [];
+
+function handleLogout(){ localStorage.clear(); window.location.href='/index.html'; }
+function showError(m){ const e=document.getElementById('error-msg'); e.textContent=m; e.style.display='block'; }
+function clearError(){ document.getElementById('error-msg').style.display='none'; }
+
+function toId32(s){ try{ return Number(BigInt(s.trim())-76561197960265728n); }catch(e){ return null; } }
+
+function mmrToRank(mmr){
+  if(!mmr||mmr<=0) return 'Некалиброван';
+  if(mmr<770) return 'Herald'; if(mmr<1540) return 'Guardian';
+  if(mmr<2310) return 'Crusader'; if(mmr<3080) return 'Archon';
+  if(mmr<3850) return 'Legend'; if(mmr<4620) return 'Ancient';
+  if(mmr<5420) return 'Divine'; return 'Immortal';
+}
+
+function onInput2(){
+  clearError();
+  const val = document.getElementById('input-p2').value.trim();
+  document.getElementById('check2').className = /^\d{17}$/.test(val) ? 'input-check ready' : 'input-check';
+}
+
+function setLoading(on){ const b=document.getElementById('compare-btn'); b.disabled=on; b.classList.toggle('loading',on); }
+
+function saveCache(data){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data})); }catch(e){} }
+function loadCache(){ try{ const r=JSON.parse(localStorage.getItem(CACHE_KEY)||'null'); if(!r) return null; if(Date.now()-r.ts>CACHE_TTL) return null; return r; }catch(e){ return null; } }
+
+function showCacheBar(ts){
+  const bar=document.getElementById('cache-bar');
+  const mins=Math.round((Date.now()-ts)/60000);
+  document.getElementById('cache-age').textContent=mins<1?'только что':mins+' мин. назад';
+  bar.classList.add('visible');
+}
+
+function resetCompare(){
+  localStorage.removeItem(CACHE_KEY);
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('compare-btn').style.display='flex';
+  document.getElementById('reset-btn').style.display='none';
+  document.getElementById('input-p2').value='';
+  document.getElementById('check2').className='input-check';
+  document.getElementById('cache-bar').classList.remove('visible');
+  document.getElementById('name2').textContent='Противник';
+  document.getElementById('rank2').textContent='Введите Steam ID ниже';
+  document.getElementById('av2').textContent='?';
+  document.getElementById('av2').innerHTML='?';
+  radarCharts.forEach(c=>c.destroy()); radarCharts=[];
+  clearError();
+}
+
+async function safeFetch(url){ try{ const r=await fetch(url); return r.ok?r.json():null; }catch(e){ return null; } }
+
+async function fetchPlayerFull(id32){
+  const base=`https://api.opendota.com/api/players/${id32}`;
+  const [player,wl,heroes,recentRaw,counts,wl30]=await Promise.all([
+    safeFetch(base), safeFetch(`${base}/wl`),
+    safeFetch(`${base}/heroes?limit=200`), safeFetch(`${base}/recentMatches`),
+    safeFetch(`${base}/counts`), safeFetch(`${base}/wl?date=30`),
+  ]);
+  const recent=Array.isArray(recentRaw)?recentRaw:[];
+
+  const [topKills,topDmg,topGpm,topXpm]=await Promise.all([
+    safeFetch(`${base}/matches?sort=kills&limit=1&significant=1`),
+    safeFetch(`${base}/matches?sort=hero_damage&limit=1&significant=1`),
+    safeFetch(`${base}/matches?sort=gold_per_min&limit=1&significant=1`),
+    safeFetch(`${base}/matches?sort=xp_per_min&limit=1&significant=1`),
+  ]);
+
+  const allMatches=await safeFetch(`${base}/matches?significant=1`)||[];
+  const hours=Math.round(allMatches.reduce((s,m)=>s+(m.duration||0),0)/3600);
+
+  let maxWin=0,run=0;
+  allMatches.forEach(m=>{ const won=(m.player_slot<128)===m.radiant_win; if(won){run++;maxWin=Math.max(maxWin,run);}else run=0; });
+
+  const calcAvg=(arr,f)=>{ const v=arr.filter(m=>m[f]).map(m=>m[f]); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0; };
+  const avgGpm=calcAvg(recent,'gold_per_min'), avgXpm=calcAvg(recent,'xp_per_min');
+
+  const n=recent.length||1;
+  const avgK=recent.reduce((s,m)=>s+(m.kills||0),0)/n;
+  const avgD=recent.reduce((s,m)=>s+(m.deaths||0),0)/n;
+  const avgA=recent.reduce((s,m)=>s+(m.assists||0),0)/n;
+  const kda=avgD>0?(avgK+avgA)/avgD:0;
+
+  const ROLE_NAMES={1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
+  let topRole='—';
+  if(counts?.lane_role){
+    const sorted=Object.entries(counts.lane_role)
+      .map(([r,obj])=>({r,cnt:typeof obj==='object'?obj.games||0:obj}))
+      .filter(x=>parseInt(x.r)>0).sort((a,b)=>b.cnt-a.cnt);
+    if(sorted[0]) topRole=ROLE_NAMES[sorted[0].r]||'—';
+  }
+
+  const heroArr=Array.isArray(heroes)?heroes:[];
+  const topPick=[...heroArr].filter(h=>h.games>0).sort((a,b)=>b.games-a.games)[0];
+  const topPickName=topPick?heroMetaMap[topPick.hero_id]?.name||`Hero ${topPick.hero_id}`:'—';
+  const topPickGames=topPick?.games||0;
+
+  const topWrH=[...heroArr].filter(h=>h.games>=5).sort((a,b)=>(b.win/b.games)-(a.win/a.games))[0];
+  const topWrName=topWrH?heroMetaMap[topWrH.hero_id]?.name||`Hero ${topWrH.hero_id}`:'—';
+  const topWrPct=topWrH?Math.round(topWrH.win/topWrH.games*100):0;
+
+  const wl30r=wl30||{win:0,lose:0};
+  const matches30=(wl30r.win||0)+(wl30r.lose||0);
+
+  return {
+    player, wl:wl||{win:0,lose:0}, kda, avgGpm, avgXpm, hours,
+    matches30, maxWinStreak:maxWin,
+    maxKills:topKills?.[0]?.kills||0,
+    maxDamage:topDmg?.[0]?.hero_damage||0,
+    maxGpm:topGpm?.[0]?.gold_per_min||0,
+    maxXpm:topXpm?.[0]?.xp_per_min||0,
+    topRole, topPickName, topPickGames, topWrName, topWrPct,
+    allMatchesCount: allMatches.length, // total from /matches
+  };
+}
+
+async function compare(){
+  const mySteam=localStorage.getItem('steam_id');
+  const oppVal=document.getElementById('input-p2').value.trim();
+  if(!mySteam){showError('Ваш Steam ID не найден');return;}
+  if(!oppVal){showError('Введите Steam ID противника');return;}
+  if(!/^\d{17}$/.test(oppVal)){showError('Steam ID должен содержать 17 цифр');return;}
+
+  clearError(); setLoading(true);
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('compare-btn').style.display='flex';
+  document.getElementById('reset-btn').style.display='none';
+  radarCharts.forEach(c=>c.destroy()); radarCharts=[];
+
+  try{
+    if(!Object.keys(heroMetaMap).length){
+      const r=await safeFetch('https://api.opendota.com/api/heroes');
+      if(r) r.forEach(h=>{ heroMetaMap[h.id]={name:h.localized_name,img:(h.name||'').replace('npc_dota_hero_','')}; });
+    }
+
+    const id1=toId32(mySteam), id2=toId32(oppVal);
+    if(id1===id2){showError('Введите другого игрока');setLoading(false);return;}
+
+    const [d1,d2]=await Promise.all([fetchPlayerFull(id1),fetchPlayerFull(id2)]);
+    if(!d1.player||!d2.player){showError('Не удалось загрузить данные');setLoading(false);return;}
+
+    saveCache({d1, d2, steam1:mySteam, steam2:oppVal});
+    showCacheBar(Date.now());
+    renderResults(d1, d2, mySteam, oppVal);
+  }catch(e){
+    showError('Ошибка загрузки. OpenDota может быть недоступен.');
+  }
+  setLoading(false);
+}
+
+function setAvatar(elId, src, name){
+  const el=document.getElementById(elId);
+  if(src) el.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`;
+  else el.textContent=name.slice(0,2).toUpperCase();
+}
+
+function renderResults(d1, d2, steam1, steam2){
+  const p1=d1.player?.profile||{}, p2=d2.player?.profile||{};
+  const name1=p1.personaname||'Игрок 1', name2=p2.personaname||'Игрок 2';
+
+  document.getElementById('name1').textContent=name1;
+  document.getElementById('name2').textContent=name2;
+  document.getElementById('hdr1').textContent=name1;
+  document.getElementById('hdr2').textContent=name2;
+
+  const mmr1=d1.player?.solo_competitive_rank||d1.player?.mmr_estimate?.estimate||0;
+  const mmr2=d2.player?.solo_competitive_rank||d2.player?.mmr_estimate?.estimate||0;
+  document.getElementById('rank1').textContent=mmrToRank(mmr1);
+  document.getElementById('rank2').textContent=mmrToRank(mmr2);
+  document.getElementById('steam1').textContent='Steam ID: '+steam1;
+
+  setAvatar('av1', p1.avatarfull, name1);
+  setAvatar('av2', p2.avatarfull, name2);
+
+  // Header avatars
+  const hav1=document.getElementById('hdr-av1');
+  const hav2=document.getElementById('hdr-av2');
+  if(p1.avatarfull) hav1.innerHTML=`<img src="${p1.avatarfull}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
+  else hav1.textContent=name1.slice(0,2).toUpperCase();
+  if(p2.avatarfull) hav2.innerHTML=`<img src="${p2.avatarfull}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
+  else hav2.textContent=name2.slice(0,2).toUpperCase();
+
+  const wl1=d1.wl, wl2=d2.wl;
+  const t1=d1.allMatchesCount||((wl1.win||0)+(wl1.lose||0));
+  const t2=d2.allMatchesCount||((wl2.win||0)+(wl2.lose||0));
+  const wr1=((wl1.win||0)+((wl1.lose||0)))>0?(wl1.win||0)/((wl1.win||0)+(wl1.lose||0))*100:0;
+  const wr2=((wl2.win||0)+((wl2.lose||0)))>0?(wl2.win||0)/((wl2.win||0)+(wl2.lose||0))*100:0;
+
+  // 5 sections × 5 metrics each
+  const sections=[
+    { sec:'🏆 Общий уровень', radarLabels:['MMR','Матчей','Часов','30-дн. матчей','Рейтинг WR'], rows:[
+      {label:'MMR',             v1:mmr1,        v2:mmr2,        fmt:v=>v?v.toLocaleString('ru'):'Некалиброван', nv1:mmr1, nv2:mmr2},
+      {label:'Всего матчей',    v1:t1,          v2:t2,          fmt:v=>v.toLocaleString('ru')},
+      {label:'Часов в игре',    v1:d1.hours,    v2:d2.hours,    fmt:v=>v+'ч'},
+      {label:'Матчей за 30 дней',v1:d1.matches30,v2:d2.matches30,fmt:v=>v},
+      {label:'Winrate',         v1:wr1,         v2:wr2,         fmt:v=>v.toFixed(1)+'%'},
+    ]},
+    { sec:'⚡ Эффективность', radarLabels:['KDA','GPM','XPM','Winrate','GPM макс.'], rows:[
+      {label:'Winrate',         v1:wr1,          v2:wr2,          fmt:v=>v.toFixed(1)+'%'},
+      {label:'KDA',             v1:d1.kda,       v2:d2.kda,       fmt:v=>isNaN(v)||!v?'—':v.toFixed(2)},
+      {label:'GPM (среднее)',   v1:d1.avgGpm,    v2:d2.avgGpm,    fmt:v=>v||'—'},
+      {label:'XPM (среднее)',   v1:d1.avgXpm,    v2:d2.avgXpm,    fmt:v=>v||'—'},
+      {label:'Любимая роль',    v1:d1.topRole,   v2:d2.topRole,   text:true, nv1:0, nv2:0},
+    ]},
+    { sec:'🎯 Рекорды', radarLabels:['Убийства','Урон','GPM','XPM','Винстрик'], rows:[
+      {label:'Макс. винстрик',  v1:d1.maxWinStreak, v2:d2.maxWinStreak, fmt:v=>v+'×'},
+      {label:'Макс. убийств',   v1:d1.maxKills,     v2:d2.maxKills,     fmt:v=>v},
+      {label:'Макс. урон',      v1:d1.maxDamage,    v2:d2.maxDamage,    fmt:v=>v?Math.round(v/1000)+'k':'—'},
+      {label:'Макс. GPM',       v1:d1.maxGpm,       v2:d2.maxGpm,       fmt:v=>v||'—'},
+      {label:'Макс. XPM',       v1:d1.maxXpm,       v2:d2.maxXpm,       fmt:v=>v||'—'},
+    ]},
+    { sec:'🦸 Стиль игры', radarLabels:['Топ пик','Топ WR%','GPM','XPM','Матчи 30д'], rows:[
+      {label:'Топ герой (пики)',   v1:d1.topPickName+' ('+d1.topPickGames+')', v2:d2.topPickName+' ('+d2.topPickGames+')', text:true, nv1:d1.topPickGames, nv2:d2.topPickGames},
+      {label:'Топ герой (WR, 5+)', v1:d1.topWrName+' '+d1.topWrPct+'%',       v2:d2.topWrName+' '+d2.topWrPct+'%',       text:true, nv1:d1.topWrPct,      nv2:d2.topWrPct},
+      {label:'GPM (среднее)',      v1:d1.avgGpm, v2:d2.avgGpm, fmt:v=>v||'—'},
+      {label:'XPM (среднее)',      v1:d1.avgXpm, v2:d2.avgXpm, fmt:v=>v||'—'},
+      {label:'Матчей за 30 дней',  v1:d1.matches30, v2:d2.matches30, fmt:v=>v},
+    ]},
+  ];
+
+  // Score
+  let score1=0, score2=0;
+  sections.forEach(sec=>sec.rows.forEach(r=>{
+    const n1=r.nv1!==undefined?r.nv1:(r.text?0:+r.v1||0);
+    const n2=r.nv2!==undefined?r.nv2:(r.text?0:+r.v2||0);
+    if(n1>n2)score1++; else if(n2>n1)score2++;
+  }));
+
+  // Winner banner
+  const banner=document.getElementById('winner-banner');
+  const total=score1+score2;
+  if(score1>score2){
+    document.getElementById('winner-name').textContent=name1;
+    document.getElementById('winner-name').style.cssText='font-size:22px;font-weight:800;margin-bottom:3px;color:var(--p1);text-shadow:0 0 20px rgba(96,165,250,0.5)';
+    document.getElementById('winner-desc').textContent=`Лидирует по ${score1} из ${total} показателей`;
+    banner.style.cssText='border-radius:var(--r-lg);padding:20px 24px;margin-bottom:20px;text-align:center;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.25);box-shadow:var(--shadow)';
+  } else if(score2>score1){
+    document.getElementById('winner-name').textContent=name2;
+    document.getElementById('winner-name').style.cssText='font-size:22px;font-weight:800;margin-bottom:3px;color:var(--p2);text-shadow:0 0 20px rgba(248,113,113,0.5)';
+    document.getElementById('winner-desc').textContent=`Лидирует по ${score2} из ${total} показателей`;
+    banner.style.cssText='border-radius:var(--r-lg);padding:20px 24px;margin-bottom:20px;text-align:center;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.25);box-shadow:var(--shadow)';
+  } else {
+    document.getElementById('winner-name').textContent='Ничья';
+    document.getElementById('winner-name').style.cssText='font-size:22px;font-weight:800;margin-bottom:3px;color:var(--accent-l)';
+    document.getElementById('winner-desc').textContent='Игроки равны по ключевым показателям';
+    banner.style.cssText='border-radius:var(--r-lg);padding:20px 24px;margin-bottom:20px;text-align:center;background:rgba(127,119,221,0.06);border:1px solid rgba(127,119,221,0.25);box-shadow:var(--shadow)';
+  }
+
+  // Build table
+  const tbody=document.getElementById('table-body');
+  tbody.innerHTML='';
+  sections.forEach(sec=>{
+    const sh=document.createElement('div'); sh.className='ct-section'; sh.textContent=sec.sec; tbody.appendChild(sh);
+    sec.rows.forEach(r=>{
+      const n1=r.nv1!==undefined?r.nv1:(r.text?0:+r.v1||0);
+      const n2=r.nv2!==undefined?r.nv2:(r.text?0:+r.v2||0);
+      const p1wins=n1>n2, p2wins=n2>n1;
+      const maxV=Math.max(Math.abs(n1),Math.abs(n2),1);
+      const pct1=Math.round(Math.abs(n1)/maxV*100), pct2=Math.round(Math.abs(n2)/maxV*100);
+      const bar1=!r.text?`<div class="bar-wrap" style="direction:rtl"><div class="bar-fill-p1" style="width:${pct1}%;opacity:${p1wins?1:0.25}"></div></div>`:'';
+      const bar2=!r.text?`<div class="bar-wrap"><div class="bar-fill-p2" style="width:${pct2}%;opacity:${p2wins?1:0.25}"></div></div>`:'';
+      const d1str=r.fmt?r.fmt(r.v1):r.v1, d2str=r.fmt?r.fmt(r.v2):r.v2;
+      const row=document.createElement('div'); row.className='ct-row';
+      row.innerHTML=`
+        <div class="ct-cell p1c"><div class="ct-val ${p1wins?'winner-p1':''}">${d1str}</div>${bar1}</div>
+        <div class="ct-cell midc"><div class="ct-label">${r.label}</div></div>
+        <div class="ct-cell p2c"><div class="ct-val ${p2wins?'winner-p2':''}">${d2str}</div>${bar2}</div>`;
+      tbody.appendChild(row);
+    });
+  });
+
+  // Build radar charts per section
+  const radarsEl=document.getElementById('radars');
+  radarsEl.innerHTML='';
+  radarCharts.forEach(c=>c.destroy()); radarCharts=[];
+
+  const normalize=(v1,v2)=>{
+    const max=Math.max(v1,v2,1);
+    return [Math.round(v1/max*100), Math.round(v2/max*100)];
+  };
+
+  sections.forEach((sec,si)=>{
+    // Get numeric values for radar
+    const vals1=[], vals2=[];
+    sec.rows.forEach(r=>{
+      const n1=r.nv1!==undefined?r.nv1:(r.text?0:+r.v1||0);
+      const n2=r.nv2!==undefined?r.nv2:(r.text?0:+r.v2||0);
+      const [a,b]=normalize(n1,n2);
+      vals1.push(a); vals2.push(b);
+    });
+
+    const card=document.createElement('div'); card.className='radar-card';
+    card.innerHTML=`
+      <div class="radar-title">${sec.sec}</div>
+      <div style="position:relative;height:200px">
+        <canvas id="radar-${si}"></canvas>
+      </div>
+      <div class="radar-legend">
+        <div class="radar-legend-item"><div class="radar-legend-dot" style="background:rgba(96,165,250,0.7)"></div>${name1}</div>
+        <div class="radar-legend-item"><div class="radar-legend-dot" style="background:rgba(248,113,113,0.7)"></div>${name2}</div>
+      </div>`;
+    radarsEl.appendChild(card);
+
+    const ctx=card.querySelector(`#radar-${si}`).getContext('2d');
+    const chart=new Chart(ctx,{
+      type:'radar',
+      data:{
+        labels: sec.rows.map(r=>r.label),
+        datasets:[
+          {label:name1, data:vals1, borderColor:'rgba(96,165,250,0.9)', backgroundColor:'rgba(96,165,250,0.12)', borderWidth:1.5, pointBackgroundColor:'#60a5fa', pointRadius:3},
+          {label:name2, data:vals2, borderColor:'rgba(248,113,113,0.9)', backgroundColor:'rgba(248,113,113,0.12)', borderWidth:1.5, pointBackgroundColor:'#f87171', pointRadius:3},
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        animation:{duration:400},
+        plugins:{ legend:{display:false}, tooltip:{
+          backgroundColor:'#0f1420', borderColor:'rgba(127,119,221,0.3)', borderWidth:1,
+          titleColor:'#AFA9EC', bodyColor:'#e8e6f8',
+        }},
+        scales:{ r:{
+          min:0, max:100,
+          grid:{color:'rgba(127,119,221,0.08)'},
+          angleLines:{color:'rgba(127,119,221,0.1)'},
+          ticks:{display:false},
+          pointLabels:{font:{size:10}, color:'#5f5c80'},
+        }}
+      }
+    });
+    radarCharts.push(chart);
+  });
+
+  document.getElementById('results').style.display='block';
+  setTimeout(()=>document.getElementById('results').classList.add('visible'),10);
+  document.getElementById('compare-btn').style.display='none';
+  document.getElementById('reset-btn').style.display='flex';
+}
+
+async function init(){
+  const token=localStorage.getItem('token');
+  const userRaw=localStorage.getItem('user');
+  if(!token||!userRaw){window.location.href='/index.html';return;}
+
+  const user=JSON.parse(userRaw);
+  document.getElementById('nav-username').textContent=user.login;
+  const navAv = document.getElementById('nav-avatar');
+const steamAv = localStorage.getItem('steam_avatar');
+if (navAv) {
+  if (steamAv) {
+    navAv.innerHTML = `<img src="${steamAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    navAv.style.background = 'none';
+    navAv.style.overflow = 'hidden';
+    navAv.style.padding = '0';
+  } else if (user.login) {
+    navAv.textContent = user.login.slice(0,2).toUpperCase();
+  }
+}
+
+  const steamId=localStorage.getItem('steam_id')||user.steam_id||'';
+  document.getElementById('steam1').textContent=steamId?'Steam ID: '+steamId:'—';
+
+  // Load from profile cache
+  if(steamId){
+    const id32=toId32(steamId);
+    const cached=id32?JSON.parse(localStorage.getItem(`mercury_cache_${id32}`)||'null'):null;
+    if(cached?.data?.player?.profile){
+      const p=cached.data.player.profile;
+      document.getElementById('name1').textContent=p.personaname||user.login;
+      setAvatar('av1', p.avatarfull, p.personaname||user.login);
+      const mmr=cached.data.player.solo_competitive_rank||cached.data.player.mmr_estimate?.estimate||0;
+      document.getElementById('rank1').textContent=mmrToRank(mmr);
+    } else {
+      document.getElementById('name1').textContent=user.login;
+      document.getElementById('av1').textContent=user.login.slice(0,2).toUpperCase();
+    }
+  }
+
+  // Restore compare cache
+  if(!Object.keys(heroMetaMap).length){
+    const r=await safeFetch('https://api.opendota.com/api/heroes');
+    if(r) r.forEach(h=>{ heroMetaMap[h.id]={name:h.localized_name,img:(h.name||'').replace('npc_dota_hero_','')}; });
+  }
+
+  const cached=loadCache();
+  if(cached){
+    const {d1,d2,steam1,steam2}=cached.data;
+    document.getElementById('input-p2').value=steam2;
+    document.getElementById('check2').className='input-check ready';
+    showCacheBar(cached.ts);
+    renderResults(d1, d2, steam1, steam2);
+    // buttons already toggled inside renderResults
+  }
+}
+
+function setAvatar(elId, src, name){
+  const el=document.getElementById(elId);
+  if(src) el.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`;
+  else el.textContent=(name||'?').slice(0,2).toUpperCase();
+}
+
+document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('keydown',e=>{ if(e.key==='Enter') compare(); });
+</script>
+</body>
+</html>

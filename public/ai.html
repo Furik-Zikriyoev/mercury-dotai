@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury DotAi — ИИ-анализ</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <style>
+    :root {
+      --bg:        #080b11;
+      --bg-card:   #0f1420;
+      --bg-hover:  #141929;
+      --border:    rgba(127,119,221,0.18);
+      --border-sub:rgba(255,255,255,0.06);
+      --accent:    #7F77DD;
+      --accent-l:  #AFA9EC;
+      --accent-bg: rgba(127,119,221,0.1);
+      --win:       #4ade80;
+      --lose:      #f87171;
+      --txt:       #e8e6f8;
+      --txt2:      #9994c0;
+      --txt3:      #5f5c80;
+      --txt4:      #3a3760;
+      --r-md:      10px;
+      --r-lg:      16px;
+      --nav-h:     68px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.4);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+    button{cursor:pointer;font-family:inherit;border:none;background:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+    /* BG */
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:0.09;pointer-events:none;z-index:0}
+    .o1{width:600px;height:600px;background:#534AB7;top:-150px;left:-150px}
+    .o2{width:450px;height:450px;background:#3C3489;bottom:-100px;right:-100px}
+    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(127,119,221,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(127,119,221,0.03) 1px,transparent 1px);background-size:60px 60px}
+
+    /* NAVBAR */
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);background:rgba(8,11,17,0.85);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px}
+    .nav-logo{display:flex;align-items:center;gap:11px;flex-shrink:0;transition:opacity .2s;text-decoration:none}
+    .nav-logo:hover{opacity:.85}
+    .nav-logo-text{font-size:17px;font-weight:600;color:var(--txt)}
+    .nav-logo-text .accent{color:var(--accent-l)}
+    .nav-links{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+    .nav-link{padding:7px 16px;border-radius:var(--r-md);font-size:13.5px;font-weight:500;color:var(--txt2);transition:background .2s,color .2s;text-decoration:none}
+    .nav-link:hover{background:rgba(255,255,255,0.05);color:var(--txt)}
+    .nav-link.active{background:var(--accent-bg);color:var(--accent-l);border:1px solid rgba(127,119,221,0.22)}
+    .nav-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#534AB7,#7F77DD);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;border:1.5px solid rgba(127,119,221,0.35)}
+    .nav-divider{width:1px;height:22px;background:var(--border)}
+    .nav-logout{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r-md);font-size:13px;font-weight:500;color:var(--lose);border:1px solid rgba(248,113,113,0.22);background:rgba(248,113,113,0.06)}
+    .nav-logout:hover{background:rgba(248,113,113,0.12)}
+
+    /* PAGE */
+    .page{position:relative;z-index:1;padding-top:calc(var(--nav-h) + 32px);padding-bottom:60px;max-width:1000px;margin:0 auto;padding-left:24px;padding-right:24px}
+
+    /* PAGE HEADER */
+    .page-header{margin-bottom:32px;animation:fadeUp .4s ease}
+    .page-title{font-size:24px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+    .page-title-icon{width:32px;height:32px;background:var(--accent-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .page-sub{font-size:14px;color:var(--txt3);line-height:1.6}
+
+    /* ANALYSIS BLOCK */
+    .ai-block{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 32px;margin-bottom:20px;box-shadow:var(--shadow);animation:fadeUp .4s ease both}
+    .ai-block:nth-child(2){animation-delay:.05s}
+    .ai-block:nth-child(3){animation-delay:.1s}
+
+    .ai-block-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+    .ai-block-left{}
+    .ai-block-num{font-size:11px;font-weight:600;color:var(--accent-l);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+    .ai-block-title{font-size:18px;font-weight:700;color:var(--txt);margin-bottom:6px}
+    .ai-block-desc{font-size:13px;color:var(--txt3);line-height:1.6;max-width:600px}
+
+    /* Analyze button */
+    .analyze-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r-md);font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,#534AB7,#7F77DD);border:none;cursor:pointer;transition:opacity .2s,transform .1s;white-space:nowrap;flex-shrink:0}
+    .analyze-btn:hover{opacity:.9}
+    .analyze-btn:active{transform:scale(.98)}
+    .analyze-btn:disabled{opacity:.5;cursor:default}
+    .analyze-btn .btn-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    .analyze-btn.loading .btn-spinner{display:block}
+    .analyze-btn.loading .btn-text{display:none}
+
+    /* Result area */
+    .ai-result{margin-top:20px;display:none}
+    .ai-result.visible{display:block;animation:fadeUp .3s ease}
+    .ai-result-inner{background:rgba(127,119,221,0.05);border:1px solid rgba(127,119,221,0.15);border-radius:var(--r-md);padding:20px 24px;font-size:14px;line-height:1.8;color:var(--txt2)}
+    .ai-result-inner strong,.ai-result-inner b{color:var(--txt);font-weight:600}
+    .ai-result-inner p{margin-bottom:10px}
+    .ai-result-inner p:last-child{margin-bottom:0}
+    .ai-thinking{display:flex;align-items:center;gap:10px;color:var(--txt3);font-size:13px;padding:16px 0}
+    .ai-thinking-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease infinite}
+    .ai-thinking-dot:nth-child(2){animation-delay:.2s}
+    .ai-thinking-dot:nth-child(3){animation-delay:.4s}
+
+    /* Match selector */
+    .match-selector{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+    .match-option{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-sub);border-radius:var(--r-md);cursor:pointer;transition:background .15s,border-color .15s;text-align:left}
+    .match-option:hover{background:var(--bg-hover);border-color:rgba(127,119,221,0.25)}
+    .match-option.selected{background:var(--accent-bg);border-color:rgba(127,119,221,0.4)}
+    .match-option-hero{width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(127,119,221,0.15)}
+    .match-option-hero img{width:100%;height:100%;object-fit:cover;object-position:center top}
+    .match-option-info{}
+    .match-option-name{font-size:13px;font-weight:600;color:var(--txt)}
+    .match-option-meta{font-size:11px;color:var(--txt3);margin-top:2px}
+    .match-result-win{color:var(--win)}
+    .match-result-lose{color:var(--lose)}
+
+    /* Stats preview */
+    .stats-preview{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .stat-chip{background:rgba(255,255,255,0.04);border:1px solid var(--border-sub);border-radius:8px;padding:8px 14px;font-size:12px}
+    .stat-chip-label{color:var(--txt3);margin-bottom:2px}
+    .stat-chip-value{font-size:15px;font-weight:700;color:var(--txt)}
+    .stat-chip-value.green{color:var(--win)}
+    .stat-chip-value.red{color:var(--lose)}
+    .stat-chip-value.accent{color:var(--accent-l)}
+  </style>
+</head>
+<body>
+
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="bg-grid"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/dashboard.html" class="nav-logo">
+    <svg width="34" height="34" viewBox="0 0 56 56" fill="none">
+      <defs>
+        <radialGradient id="pg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient>
+        <radialGradient id="gw" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7F77DD" stop-opacity="0.25"/><stop offset="100%" stop-color="#7F77DD" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="28" cy="28" r="27" fill="url(#gw)"/>
+      <circle cx="28" cy="28" r="11" fill="url(#pg)"/>
+      <ellipse cx="23.5" cy="23" rx="4.2" ry="2.8" fill="rgba(255,255,255,0.22)" transform="rotate(-30,23.5,23)"/>
+    </svg>
+    <span class="nav-logo-text">Mercury <span class="accent">DotAi</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="/dashboard.html" class="nav-link">Профиль</a>
+    <a href="/heroes.html"    class="nav-link">Герои</a>
+    <a href="/matches.html"   class="nav-link">Матчи</a>
+    <a href="/ai.html"        class="nav-link active">ИИ-анализ</a>
+    <a href="/compare.html"               class="nav-link">Сравнение</a>
+    <a href="/chat.html" class="nav-link">ИИ-чат</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <span style="font-size:13.5px;font-weight:500" id="nav-username">—</span>
+    <div class="nav-divider"></div>
+    <button class="nav-logout" onclick="handleLogout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Выйти
+    </button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="page-title">
+          <div class="page-title-icon">🤖</div>
+          ИИ-анализ
+        </div>
+        <div class="page-sub">
+          Персональный анализ вашей игры на основе данных OpenDota.<br>
+          ИИ выявляет проблемы, объясняет причины и даёт конкретные рекомендации по улучшению.
+        </div>
+      </div>
+      <button onclick="resetAllAnalysis()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:500;color:var(--accent-l);border:1px solid rgba(127,119,221,0.3);background:var(--accent-bg);cursor:pointer;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='rgba(127,119,221,0.18)'" onmouseout="this.style.background='var(--accent-bg)'">
+        🔄 Сбросить анализы
+      </button>
+    </div>
+  </div>
+
+  <!-- BLOCK 1: General Stats -->
+  <div class="ai-block" id="block-stats">
+    <div class="ai-block-header">
+      <div class="ai-block-left">
+        
+        <div class="ai-block-title">Общая статистика</div>
+        <div class="ai-block-desc">
+          ИИ проанализирует ваш винрейт, KDA, GPM/XPM, паттерны активности и психологический профиль игрока.
+          Выявит сильные и слабые стороны вашей игры в целом.
+        </div>
+      </div>
+      <button class="analyze-btn" id="btn-stats" onclick="analyzeStats()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">📊 Анализировать</span>
+      </button>
+    </div>
+
+    <!-- Stats preview -->
+    <div class="stats-preview" id="stats-preview"></div>
+
+    <div class="ai-result" id="result-stats">
+      <div class="ai-result-inner" id="result-stats-text"></div>
+    </div>
+  </div>
+
+  <!-- BLOCK 2: Heroes -->
+  <div class="ai-block" id="block-heroes">
+    <div class="ai-block-header">
+      <div class="ai-block-left">
+        
+        <div class="ai-block-title">Анализ героев</div>
+        <div class="ai-block-desc">
+          ИИ разберёт ваш пул героев: сильных, средних и проблемных.
+          Для каждой группы — конкретные советы как улучшить показатели.
+        </div>
+      </div>
+      <button class="analyze-btn" id="btn-heroes" onclick="analyzeHeroes()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">🦸 Анализировать</span>
+      </button>
+    </div>
+
+    <!-- Heroes preview -->
+    <div id="heroes-preview"></div>
+
+    <div class="ai-result" id="result-heroes">
+      <div class="ai-result-inner" id="result-heroes-text"></div>
+    </div>
+  </div>
+
+  <!-- BLOCK 3: Match -->
+  <div class="ai-block" id="block-match">
+    <div class="ai-block-header">
+      <div class="ai-block-left">
+        
+        <div class="ai-block-title">Разбор матча</div>
+        <div class="ai-block-desc">
+          Выберите матч из последних 10 и получите детальный разбор.
+          ИИ объяснит причины победы или поражения и что можно было сделать лучше.
+        </div>
+      </div>
+      <button class="analyze-btn" id="btn-match" onclick="analyzeMatch()" disabled>
+        <div class="btn-spinner"></div>
+        <span class="btn-text">⚔️ Разобрать матч</span>
+      </button>
+    </div>
+
+    <!-- Match selector -->
+    <div class="match-selector" id="match-selector"></div>
+
+    <div class="ai-result" id="result-match">
+      <div class="ai-result-inner" id="result-match-text"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+//   STATE
+// =============================================
+const API = 'http://localhost:3000/api';
+const CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes';
+const ROLE_NAMES = {1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
+const AI_CACHE_KEY = 'mercury_ai_results';
+
+let heroMetaMap = {};
+let cachedStats   = null;
+let cachedHeroes  = null;
+let cachedMatches = null;
+let selectedMatch = null;
+
+function saveAIResult(key, text) {
+  try {
+    const all = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+    all[key] = { text, ts: Date.now() };
+    localStorage.setItem(AI_CACHE_KEY, JSON.stringify(all));
+  } catch(e) {}
+}
+
+function loadAIResult(key) {
+  try {
+    const all = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+    return all[key]?.text || null;
+  } catch(e) { return null; }
+}
+
+function clearAIResults() {
+  localStorage.removeItem(AI_CACHE_KEY);
+}
+
+// =============================================
+//   INIT
+// =============================================
+function handleLogout() { localStorage.clear(); window.location.href = '/index.html'; }
+
+function resetAllAnalysis() {
+  clearAIResults();
+  ['result-stats', 'result-heroes', 'result-match'].forEach(id => {
+    const wrap = document.getElementById(id);
+    if (wrap) wrap.classList.remove('visible');
+  });
+}
+
+function secToTime(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+function isWin(m) { return (m.player_slot < 128) === m.radiant_win; }
+
+async function init() {
+  const token   = localStorage.getItem('token');
+  const userRaw = localStorage.getItem('user');
+  if (!token || !userRaw) { window.location.href = '/index.html'; return; }
+
+  const user = JSON.parse(userRaw);
+  document.getElementById('nav-username').textContent = user.login;
+  document.getElementById('nav-avatar').textContent   = user.login.slice(0,2).toUpperCase();
+
+  // Load hero meta
+  try {
+    const r = await fetch('https://api.opendota.com/api/heroes');
+    if (r.ok) {
+      const heroes = await r.json();
+      heroes.forEach(h => {
+        heroMetaMap[h.id] = { name: h.localized_name, img: (h.name||'').replace('npc_dota_hero_','') };
+      });
+    }
+  } catch(e) {}
+
+  loadCachedData();
+}
+
+function loadCachedData() {
+  // Load from localStorage caches
+  try {
+    const steamId = localStorage.getItem('steam_id');
+    const id32 = steamId ? Number(BigInt(steamId) - 76561197960265728n) : null;
+
+    // Dashboard cache
+    const dashCache = id32 ? JSON.parse(localStorage.getItem(`mercury_cache_${id32}`) || 'null') : null;
+    if (dashCache?.data) {
+      const d = dashCache.data;
+      const matches = d.matches || [];
+      const recent  = d.recent  || [];
+      const wl      = d.wl      || {};
+
+      // Stats data
+      const wins = wl.win || 0, losses = wl.lose || 0, total = wins + losses;
+      const wr   = total > 0 ? (wins/total*100).toFixed(1) : '0';
+
+      let sumK=0,sumD=0,sumA=0,sumGpm=0,sumXpm=0,cntGpm=0,cntXpm=0;
+      const hourCounts = new Array(24).fill(0);
+      const src = recent.length ? recent : matches;
+      src.forEach(m => {
+        sumK += m.kills||0; sumD += m.deaths||0; sumA += m.assists||0;
+        if (m.gold_per_min) { sumGpm += m.gold_per_min; cntGpm++; }
+        if (m.xp_per_min)  { sumXpm += m.xp_per_min;  cntXpm++; }
+        if (m.start_time)  hourCounts[new Date(m.start_time*1000).getUTCHours()]++;
+      });
+      const n = src.length || 1;
+      const avgK = (sumK/n).toFixed(1), avgD = (sumD/n).toFixed(1), avgA = (sumA/n).toFixed(1);
+      const kda  = avgD>0 ? ((parseFloat(avgK)+parseFloat(avgA))/parseFloat(avgD)).toFixed(2) : '∞';
+      const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
+
+      // Role distribution
+      const roleCounts = {};
+      // Use all matches for role distribution
+      const allForRoles = matches.length ? matches : src;
+      allForRoles.forEach(m => {
+        const r = m.lane_role;
+        if (r && r > 0) roleCounts[r] = (roleCounts[r]||0)+1;
+      });
+      const rolesStr = Object.entries(roleCounts)
+        .sort((a,b)=>b[1]-a[1]).slice(0,3)
+        .map(([r,c])=>`${ROLE_NAMES[r]||'?'} (${c})`).join(', ') || 'Нет данных';
+
+      // Считаем стрики из матчей
+      const allMatchResults = (matches.length ? matches : src).map(m => (m.player_slot < 128) === m.radiant_win);
+      let maxWinStreak=0, maxLoseStreak=0, runW=0, runL=0;
+      allMatchResults.forEach(won => {
+        if(won){runW++;runL=0;maxWinStreak=Math.max(maxWinStreak,runW);}
+        else{runL++;runW=0;maxLoseStreak=Math.max(maxLoseStreak,runL);}
+      });
+
+      // Роли из counts кэша если есть
+      const ROLE_NAMES_LOCAL = {1:'Carry',2:'Mid',3:'Offlane',4:'Soft Support',5:'Hard Support'};
+      let rolesStrFinal = rolesStr;
+      if (d.counts?.lane_role) {
+        const rc = {};
+        Object.entries(d.counts.lane_role).forEach(([r,obj]) => {
+          const cnt = typeof obj==='object'?obj.games||0:obj;
+          if(parseInt(r)>0) rc[r]=cnt;
+        });
+        const total_roles = Object.values(rc).reduce((a,b)=>a+b,0)||1;
+        rolesStrFinal = Object.entries(rc).sort((a,b)=>b[1]-a[1]).slice(0,3)
+          .map(([r,c])=>`${ROLE_NAMES_LOCAL[r]||'?'} (${Math.round(c/total_roles*100)}%)`).join(', ') || rolesStr;
+      }
+
+      cachedStats = {
+        winrate: wr, kda, totalMatches: total, wins, losses,
+        gpm: cntGpm ? Math.round(sumGpm/cntGpm) : '—',
+        xpm: cntXpm ? Math.round(sumXpm/cntXpm) : '—',
+        hours: d.wl ? Math.round((matches.reduce((s,m)=>s+(m.duration||0),0))/3600) : '—',
+        peakHour, roles: rolesStrFinal,
+        avgKills: avgK, avgDeaths: avgD, avgAssists: avgA,
+        maxWinStreak, maxLoseStreak,
+      };
+
+      renderStatsPreview(cachedStats);
+    }
+
+    // Heroes cache
+    const heroCache = JSON.parse(localStorage.getItem('mercury_heroes_cache') || 'null');
+    if (heroCache?.data) {
+      const heroes = heroCache.data.filter(h => h.games > 0);
+      cachedHeroes = {
+        good: heroes.filter(h => h.games>=5 && h.wr>=55).sort((a,b)=>b.wr-a.wr).slice(0,5),
+        avg:  heroes.filter(h => h.games>=3 && h.wr>=45 && h.wr<55).sort((a,b)=>b.games-a.games).slice(0,5),
+        bad:  heroes.filter(h => h.games>=5 && h.wr<45).sort((a,b)=>a.wr-b.wr).slice(0,8),
+        totalHeroes: heroes.length,
+      };
+      renderHeroesPreview(cachedHeroes);
+    }
+
+    // Matches cache
+    const matchCache = JSON.parse(localStorage.getItem('mercury_matches_cache') || 'null');
+    if (matchCache?.data) {
+      cachedMatches = matchCache.data.slice(0, 10);
+      renderMatchSelector(cachedMatches);
+    }
+
+  } catch(e) { console.error('Cache load error:', e); }
+
+  // Restore saved AI results
+  restoreAIResults();
+}
+
+function restoreAIResults() {
+  const formatterMap = {
+    'result-stats':   formatAnalysis,
+    'result-heroes':  formatHeroes,
+    'result-match':   formatAnalysis,
+  };
+  Object.entries(formatterMap).forEach(([id, formatter]) => {
+    const saved = loadAIResult(id);
+    if (!saved) return;
+    const wrap = document.getElementById(id);
+    const inner = document.getElementById(id + '-text');
+    if (wrap && inner) {
+      if (id === 'result-match') {
+        try {
+          const parsed = JSON.parse(saved);
+          inner.innerHTML = formatMatch(parsed.text, parsed.matchData);
+        } catch(e) {
+          inner.innerHTML = formatAnalysis(saved);
+        }
+      } else {
+        inner.innerHTML = formatter(saved);
+      }
+      wrap.classList.add('visible');
+    }
+  });
+}
+
+// =============================================
+//   RENDER PREVIEWS
+// =============================================
+function renderStatsPreview(s) {
+  const el = document.getElementById('stats-preview');
+  if (!el || !s) return;
+  const wrClass = parseFloat(s.winrate) >= 50 ? 'green' : 'red';
+  el.innerHTML = `
+    <div class="stat-chip"><div class="stat-chip-label">Винрейт</div><div class="stat-chip-value ${wrClass}">${s.winrate}%</div></div>
+    <div class="stat-chip"><div class="stat-chip-label">KDA</div><div class="stat-chip-value accent">${s.kda}</div></div>
+    <div class="stat-chip"><div class="stat-chip-label">Матчей</div><div class="stat-chip-value">${s.totalMatches}</div></div>
+    <div class="stat-chip"><div class="stat-chip-label">GPM / XPM</div><div class="stat-chip-value">${s.gpm} / ${s.xpm}</div></div>
+    <div class="stat-chip"><div class="stat-chip-label">Пик активности</div><div class="stat-chip-value">${s.peakHour}:00</div></div>
+    <div class="stat-chip"><div class="stat-chip-label">Топ роли</div><div class="stat-chip-value" style="font-size:12px">${s.roles||'—'}</div></div>
+  `;
+}
+
+function renderHeroesPreview(h) {
+  const el = document.getElementById('heroes-preview');
+  if (!el || !h) return;
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--win);font-weight:600">✓ Сильных: ${h.good.length}</span>
+      <span style="font-size:12px;color:var(--txt3)">·</span>
+      <span style="font-size:12px;color:var(--txt2);font-weight:600">~ Средних: ${h.avg.length}</span>
+      <span style="font-size:12px;color:var(--txt3)">·</span>
+      <span style="font-size:12px;color:var(--lose);font-weight:600">✗ Проблемных: ${h.bad.length}</span>
+    </div>
+  `;
+}
+
+function renderMatchSelector(matches) {
+  const el = document.getElementById('match-selector');
+  if (!el) return;
+  const savedIdx = parseInt(localStorage.getItem('mercury_ai_selected_match') ?? '-1');
+  if (savedIdx >= 0 && savedIdx < matches.length) {
+    selectedMatch = matches[savedIdx];
+    setTimeout(() => {
+      document.querySelectorAll('.match-option').forEach((opt,i) => opt.classList.toggle('selected', i === savedIdx));
+      document.getElementById('btn-match').disabled = false;
+    }, 50);
+  }
+  el.innerHTML = matches.map((m,i) => {
+    const win  = isWin(m);
+    const hero = heroMetaMap[m.hero_id];
+    const img  = hero ? `${CDN}/${hero.img}.png` : '';
+    const name = hero?.name || `Hero ${m.hero_id}`;
+    const dur  = m.duration ? secToTime(m.duration) : '—';
+    const kda  = m.kills !== undefined ? `${m.kills}/${m.deaths}/${m.assists}` : '—';
+    return `
+      <div class="match-option" onclick="selectMatch(${i})" id="match-opt-${i}">
+        <div class="match-option-hero">
+          ${img ? `<img src="${img}" alt="${name}" style="width:100%;height:100%;object-fit:cover;object-position:center top">` : ''}
+        </div>
+        <div class="match-option-info">
+          <div class="match-option-name">${name}</div>
+          <div class="match-option-meta">
+            <span class="${win?'match-result-win':'match-result-lose'}">${win?'Победа':'Поражение'}</span>
+            · ${dur} · ${kda}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function selectMatch(idx) {
+  selectedMatch = cachedMatches[idx];
+  document.querySelectorAll('.match-option').forEach((el,i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-match').disabled = false;
+  try { localStorage.setItem('mercury_ai_selected_match', idx); } catch(e) {}
+}
+
+// =============================================
+//   AI CALLS
+// =============================================
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+}
+
+function formatAnalysis(text) {
+  return text
+    .split('\n')
+    .filter(l => l.trim())
+    .map(l => {
+      const t = l.trim();
+
+      // Section headers with emoji
+      if (/^[🟣📊⚔️💰📈🧠🎯💚🟡🔴📋✅❌💪⚠️🔄🦸💡🏆]/.test(t)) {
+        return `<p style="font-size:15px;font-weight:700;color:#e8e6f8;margin-top:20px;margin-bottom:8px">${t}</p>`;
+      }
+      // Плюсы
+      if (/^Плюсы:?$/i.test(t)) return `<p style="font-weight:700;color:#4ade80;margin-top:12px;margin-bottom:6px">✓ ${t}</p>`;
+      // Минусы
+      if (/^Минусы:?$/i.test(t)) return `<p style="font-weight:700;color:#f87171;margin-top:12px;margin-bottom:6px">✗ ${t}</p>`;
+      // Как улучшить
+      if (/^Как улучшить:?$/i.test(t)) return `<p style="font-weight:700;color:#facc15;margin-top:12px;margin-bottom:6px">→ ${t}</p>`;
+      // Что это значит
+      if (/^Что это значит:?/i.test(t)) return `<p style="color:#9994c0;font-style:italic;margin-bottom:6px">${t}</p>`;
+      // Проблема паттерна
+      if (/^(Проблема паттерна|Главная проблема|Конкретное решение):?/i.test(t)) {
+        return `<p style="font-weight:600;color:#f87171;margin-top:10px;margin-bottom:6px">${t}</p>`;
+      }
+      // Как развивать etc
+      if (/^(Как развивать|Что мешает расти|На чём фокусироваться|Кого убрать|Кого попробовать):?/i.test(t)) {
+        return `<p style="font-weight:600;color:#facc15;margin-top:10px;margin-bottom:6px">${t}</p>`;
+      }
+      // Numbered list — purple block
+      if (/^\d+\./.test(t)) {
+        const num = t.match(/^(\d+)/)[1];
+        const txt = t.replace(/^\d+\.\s*/, '');
+        return `<div style="display:flex;gap:10px;background:rgba(127,119,221,0.07);border-left:3px solid rgba(127,119,221,0.4);padding:8px 14px;margin-bottom:6px;border-radius:0 8px 8px 0">
+          <span style="color:#AFA9EC;font-weight:700;flex-shrink:0">${num}.</span>
+          <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+        </div>`;
+      }
+      // Bullet list — purple block
+      if (/^[-•]/.test(t)) {
+        const txt = t.replace(/^[-•]\s*/, '');
+        return `<div style="display:flex;gap:10px;background:rgba(127,119,221,0.07);border-left:3px solid rgba(127,119,221,0.4);padding:8px 14px;margin-bottom:6px;border-radius:0 8px 8px 0">
+          <span style="color:#AFA9EC;flex-shrink:0">›</span>
+          <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+        </div>`;
+      }
+      // Divider
+      if (/^---+$/.test(t)) return `<hr style="border:none;border-top:1px solid rgba(127,119,221,0.15);margin:16px 0">`;
+      // Bold
+      let line = t.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#e8e6f8">$1</strong>');
+      return `<p style="color:#9994c0;line-height:1.7;margin-bottom:6px">${line}</p>`;
+    })
+    .join('');
+}
+
+function heroImgFromName(name) {
+  // Find in heroMetaMap by localized name
+  const entry = Object.values(heroMetaMap).find(h => h.name === name);
+  if (!entry) return null;
+  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${entry.img}.png`;
+}
+
+function formatHeroes(text) {
+  const lines = text.split('\n');
+  let result = '';
+  let i = 0;
+
+  while (i < lines.length) {
+    const t = lines[i].trim();
+    if (!t) { i++; continue; }
+
+    // Section headers with emoji
+    if (/^💚|^⚡|^💀|^📋/.test(t)) {
+      result += `<p style="font-size:15px;font-weight:700;color:#e8e6f8;margin-top:20px;margin-bottom:10px">${t}</p>`;
+      i++; continue;
+    }
+
+    // Hero name line: "[Name] — WR X%"
+    const heroMatch = t.match(/^\[?([A-Za-zА-Яа-яёЁ'\s\-]+?)\]?\s*[—–-]\s*WR\s*([\d.]+)%/i);
+    if (heroMatch) {
+      const heroName = heroMatch[1].trim();
+      const wr = parseFloat(heroMatch[2]);
+      const wrColor = wr >= 55 ? '#4ade80' : wr >= 45 ? '#facc15' : '#f87171';
+      const entry = Object.values(heroMetaMap).find(h => h.name.toLowerCase() === heroName.toLowerCase());
+      const imgHtml = entry
+        ? `<img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${entry.img}.png" style="width:28px;height:28px;border-radius:6px;object-fit:cover;object-position:center top;vertical-align:middle;margin-right:8px" onerror="this.style.display='none'">`
+        : '';
+      result += `<p style="font-weight:700;font-size:14px;color:#e8e6f8;margin-top:14px;margin-bottom:4px;display:flex;align-items:center">${imgHtml}<span>${heroName}</span><span style="color:${wrColor};margin-left:8px;font-size:13px">WR ${wr}%</span></p>`;
+      i++; continue;
+    }
+
+    // Label lines — look ahead for content on next line
+    if (/^Почему работает:?/i.test(t)) {
+      const inline = t.replace(/^Почему работает:?\s*/i, '').trim();
+      result += `<p style="font-weight:600;color:#4ade80;margin-top:8px;margin-bottom:2px">Почему работает:</p>`;
+      if (inline) {
+        result += `<p style="color:#e8e6f8;margin-bottom:4px">${inline}</p>`;
+        i++;
+      } else {
+        i++;
+        while (i < lines.length && !lines[i].trim()) i++;
+        if (i < lines.length && !/^[💚⚡💀📋🔥🔴]|^---/.test(lines[i].trim())) {
+          result += `<p style="color:#e8e6f8;margin-bottom:4px">${lines[i].trim()}</p>`;
+          i++;
+        }
+      }
+      continue;
+    }
+    if (/^Что мешает расти:?/i.test(t)) {
+      const inline = t.replace(/^Что мешает расти:?\s*/i, '').trim();
+      result += `<p style="font-weight:600;color:#facc15;margin-top:8px;margin-bottom:2px">Что мешает расти:</p>`;
+      if (inline) {
+        result += `<p style="color:#e8e6f8;margin-bottom:4px">${inline}</p>`;
+        i++;
+      } else {
+        i++;
+        while (i < lines.length && !lines[i].trim()) i++;
+        if (i < lines.length && !/^[💚⚡💀📋🔥🔴]|^---/.test(lines[i].trim())) {
+          result += `<p style="color:#e8e6f8;margin-bottom:4px">${lines[i].trim()}</p>`;
+          i++;
+        }
+      }
+      continue;
+    }
+    if (/^Главная проблема:?/i.test(t)) {
+      const inline = t.replace(/^Главная проблема:?\s*/i, '').trim();
+      result += `<p style="font-weight:600;color:#f87171;margin-top:8px;margin-bottom:2px">Главная проблема:</p>`;
+      if (inline) {
+        result += `<p style="color:#e8e6f8;margin-bottom:4px">${inline}</p>`;
+        i++;
+      } else {
+        i++;
+        while (i < lines.length && !lines[i].trim()) i++;
+        if (i < lines.length && !/^[💚⚡💀📋🔥🔴]|^---/.test(lines[i].trim())) {
+          result += `<p style="color:#e8e6f8;margin-bottom:4px">${lines[i].trim()}</p>`;
+          i++;
+        }
+      }
+      continue;
+    }
+    if (/^(Как развивать|Как улучшить|Конкретное решение):?/i.test(t)) {
+      const labelMatch = t.match(/^(Как развивать|Как улучшить|Конкретное решение):?\s*/i);
+      const label = labelMatch ? labelMatch[0].replace(/:\s*$/, ':') : t;
+      const inline = t.slice(label.length).trim();
+      result += `<p style="font-weight:700;color:#AFA9EC;margin-top:8px;margin-bottom:4px">${label.trim()}</p>`;
+      if (inline) {
+        // split inline numbered "1) text 2) text"
+        const parts = inline.split(/(?=\d+[).]\s)/).filter(Boolean);
+        parts.forEach(part => {
+          const num = part.trim().match(/^(\d+)/)?.[1] || '';
+          const txt = part.trim().replace(/^\d+[).]\.?\s*/, '');
+          result += `<div style="display:flex;gap:10px;background:rgba(127,119,221,0.07);border-left:3px solid rgba(127,119,221,0.4);padding:8px 14px;margin-bottom:6px;border-radius:0 8px 8px 0">
+            <span style="color:#AFA9EC;font-weight:700;flex-shrink:0">${num}.</span>
+            <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+          </div>`;
+        });
+      }
+      i++; continue;
+    }
+    if (/^На чём фокусироваться:?$/i.test(t)) {
+      result += `<p style="font-weight:600;color:#facc15;margin-top:8px;margin-bottom:4px">${t}</p>`;
+      i++; continue;
+    }
+    if (/^Кого убрать из пула:?$/i.test(t)) {
+      result += `<p style="font-weight:600;color:#f87171;margin-top:8px;margin-bottom:4px">${t}</p>`;
+      // Next line is comma-separated hero names — add icons
+      i++;
+      while (i < lines.length && !lines[i].trim()) i++;
+      if (i < lines.length) {
+        const names = lines[i].trim().split(',').map(n => n.trim()).filter(Boolean);
+        const namesHtml = names.map(name => {
+          const entry = Object.values(heroMetaMap).find(h => h.name.toLowerCase() === name.toLowerCase());
+          const imgHtml = entry
+            ? `<img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${entry.img}.png" style="width:20px;height:20px;border-radius:4px;object-fit:cover;object-position:center top;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'">`
+            : '';
+          return `<span style="display:inline-flex;align-items:center;margin-right:10px;color:#f87171">${imgHtml}${name}</span>`;
+        }).join('');
+        result += `<p style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${namesHtml}</p>`;
+        i++;
+      }
+      continue;
+    }
+    if (/^Кого попробовать:?$/i.test(t)) {
+      result += `<p style="font-weight:600;color:#4ade80;margin-top:8px;margin-bottom:4px">${t}</p>`;
+      i++;
+      while (i < lines.length && !lines[i].trim()) i++;
+      if (i < lines.length) {
+        result += `<p style="color:#e8e6f8;margin-bottom:4px">${lines[i].trim()}</p>`;
+        i++;
+      }
+      continue;
+    }
+
+    // Numbered list — purple block
+    if (/^\d+[.)]\.?\s/.test(t)) {
+      const num = t.match(/^(\d+)/)[1];
+      const txt = t.replace(/^\d+[).]\.?\s*/, '');
+      result += `<div style="display:flex;gap:10px;background:rgba(127,119,221,0.07);border-left:3px solid rgba(127,119,221,0.4);padding:8px 14px;margin-bottom:6px;border-radius:0 8px 8px 0">
+        <span style="color:#AFA9EC;font-weight:700;flex-shrink:0">${num}.</span>
+        <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+      </div>`;
+      i++; continue;
+    }
+    // Divider
+    if (/^---+$/.test(t)) {
+      result += `<hr style="border:none;border-top:1px solid rgba(127,119,221,0.15);margin:14px 0">`;
+      i++; continue;
+    }
+
+    // Split inline numbered items like "1) text 2) text" into separate lines
+    if (/\d+[).]/.test(t)) {
+      const parts = t.split(/(?=\d+[).])/).filter(Boolean);
+      parts.forEach(part => {
+        const fixed = part.trim().replace(/^(\d+)[).]\.?\s*/, '$1. ');
+        result += `<p style="color:#e8e6f8;padding-left:20px;margin-bottom:3px">${fixed}</p>`;
+      });
+      i++; continue;
+    }
+    result += `<p style="color:#e8e6f8;margin-bottom:3px">${t}</p>`;
+    i++;
+  }
+  return result;
+}
+
+function formatMatch(text, matchData) {
+  const isWin = matchData?.result === 'Победа';
+  const heroEntry = matchData ? Object.values(heroMetaMap).find(h => h.name === matchData.hero) : null;
+  const heroImgUrl = heroEntry ? `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${heroEntry.img}.png` : '';
+
+  // Match info card at top
+  let header = `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(127,119,221,0.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px">Матч</div>
+        <div style="font-size:14px;font-weight:600;color:#e8e6f8">#${matchData?.matchId || '—'}</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.08)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px">Длительность</div>
+        <div style="font-size:14px;font-weight:600;color:#e8e6f8">${matchData?.duration || '—'}</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.08)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px">Результат</div>
+        <div style="font-size:15px;font-weight:700;color:${isWin ? '#4ade80' : '#f87171'}">${matchData?.result || '—'}</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.08)"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${heroImgUrl ? `<img src="${heroImgUrl}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;object-position:center top">` : ''}
+        <div>
+          <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.5px">Герой</div>
+          <div style="font-size:14px;font-weight:600;color:#e8e6f8">${matchData?.hero || '—'} <span style="color:var(--txt3);font-weight:400;font-size:12px">(${matchData?.role || '—'})</span></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Format the AI text
+  const lines = text.split('\n').filter(l => l.trim());
+  let body = '';
+
+  lines.forEach(l => {
+    const t = l.trim();
+
+    // Skip first line if it's the match header (we have our own)
+    if (/^[✅❌💀].*МАТЧ/i.test(t)) return;
+
+    // Section headers with emoji
+    if (/^[🎯📊💪⚠️❌🔄🦸💡✅❌🏆🎮]/.test(t)) {
+      body += `<div style="display:flex;align-items:center;gap:8px;margin-top:20px;margin-bottom:10px">
+        <div style="font-size:15px;font-weight:700;color:#e8e6f8">${t}</div>
+      </div>`;
+      return;
+    }
+
+    // Bullet/dash list items
+    if (/^[-•]/.test(t)) {
+      const txt = t.replace(/^[-•]\s*/, '');
+      body += `<div style="display:flex;gap:10px;margin-bottom:8px;padding-left:4px">
+        <span style="color:var(--accent-l);flex-shrink:0;margin-top:1px">›</span>
+        <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+      </div>`;
+      return;
+    }
+
+    // Numbered items
+    if (/^\d+[).]/.test(t)) {
+      const num = t.match(/^(\d+)/)[1];
+      const txt = t.replace(/^\d+[).]\.?\s*/, '');
+      body += `<div style="display:flex;gap:10px;margin-bottom:8px;padding-left:4px">
+        <span style="color:var(--accent-l);font-weight:700;flex-shrink:0;min-width:18px">${num}.</span>
+        <span style="color:#e8e6f8;line-height:1.6">${txt}</span>
+      </div>`;
+      return;
+    }
+
+    // GPM/KDA/Урон inline stats
+    if (/^(GPM|KDA|Урон|XPM)/i.test(t)) {
+      const parts = t.split(':');
+      body += `<div style="background:rgba(127,119,221,0.06);border-left:3px solid rgba(127,119,221,0.4);padding:8px 14px;margin-bottom:8px;border-radius:0 8px 8px 0">
+        <span style="font-weight:600;color:#AFA9EC">${parts[0]}:</span>
+        <span style="color:#e8e6f8">${parts.slice(1).join(':')}</span>
+      </div>`;
+      return;
+    }
+
+    // Divider
+    if (/^---+$/.test(t)) {
+      body += `<hr style="border:none;border-top:1px solid rgba(127,119,221,0.12);margin:14px 0">`;
+      return;
+    }
+
+    // Regular text
+    const formatted = t.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#e8e6f8">$1</strong>');
+    body += `<p style="color:#9994c0;line-height:1.7;margin-bottom:8px">${formatted}</p>`;
+  });
+
+  return header + body;
+}
+
+function showResult(resultId, text, save = true) {
+  const wrap = document.getElementById(resultId);
+  const inner = document.getElementById(resultId + '-text');
+  if (!wrap || !inner) return;
+  inner.innerHTML = formatAnalysis(text);
+  wrap.classList.add('visible');
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (save) saveAIResult(resultId, text);
+}
+
+function showThinking(resultId) {
+  const wrap = document.getElementById(resultId);
+  const inner = document.getElementById(resultId + '-text');
+  if (!wrap || !inner) return;
+  inner.innerHTML = `<div class="ai-thinking">
+    <div class="ai-thinking-dot"></div>
+    <div class="ai-thinking-dot"></div>
+    <div class="ai-thinking-dot"></div>
+    <span style="margin-left:4px">ИИ анализирует данные...</span>
+  </div>`;
+  wrap.classList.add('visible');
+}
+
+async function callAI(type, data, btnId, resultId) {
+  const token = localStorage.getItem('token');
+  setLoading(btnId, true);
+  showThinking(resultId);
+
+  try {
+    const res = await fetch(`${API}/ai/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ type, data }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Ошибка сервера');
+
+    // Use dedicated formatter per type
+    const wrap = document.getElementById(resultId);
+    const inner = document.getElementById(resultId + '-text');
+    if (wrap && inner) {
+      if (type === 'heroes') {
+        inner.innerHTML = formatHeroes(result.analysis);
+      } else if (type === 'match') {
+        inner.innerHTML = formatMatch(result.analysis, data);
+      } else {
+        inner.innerHTML = formatAnalysis(result.analysis);
+      }
+      wrap.classList.add('visible');
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // For match, save data too
+      if (type === 'match') saveAIResult(resultId, JSON.stringify({text: result.analysis, matchData: data}));
+      else saveAIResult(resultId, result.analysis);
+    }
+  } catch(e) {
+    showResult(resultId, `❌ Ошибка: ${e.message}`);
+  } finally {
+    setLoading(btnId, false);
+  }
+}
+
+async function analyzeStats() {
+  if (!cachedStats) return showResult('result-stats', '❌ Данные профиля не найдены. Откройте страницу Профиль и подождите загрузки.');
+  await callAI('stats', cachedStats, 'btn-stats', 'result-stats');
+}
+
+async function analyzeHeroes() {
+  if (!cachedHeroes) return showResult('result-heroes', '❌ Данные героев не найдены. Откройте страницу Герои и подождите загрузки.');
+  await callAI('heroes', cachedHeroes, 'btn-heroes', 'result-heroes');
+}
+
+async function analyzeMatch() {
+  if (!selectedMatch) return;
+  const m = selectedMatch;
+  const hero = heroMetaMap[m.hero_id];
+  const win  = isWin(m);
+  const data = {
+    matchId:   m.match_id || '—',
+    hero:      hero?.name || `Hero ${m.hero_id}`,
+    result:    win ? 'Победа' : 'Поражение',
+    kills:     m.kills     ?? '—',
+    deaths:    m.deaths    ?? '—',
+    assists:   m.assists   ?? '—',
+    gpm:       m.gold_per_min ?? '—',
+    xpm:       m.xp_per_min  ?? '—',
+    damage:    m.hero_damage ? Math.round(m.hero_damage).toLocaleString('ru') : '—',
+    networth:  m.net_worth   ? Math.round(m.net_worth).toLocaleString('ru')  : '—',
+    duration:  m.duration    ? secToTime(m.duration) : '—',
+    role:      ROLE_NAMES[m.lane_role] || 'неизвестно',
+  };
+  await callAI('match', data, 'btn-match', 'result-match');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
