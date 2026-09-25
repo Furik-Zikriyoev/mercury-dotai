@@ -178,7 +178,7 @@
     .input-hint{font-size:11px;color:var(--txt4);margin-top:7px;text-align:center}
   </style>
 </head>
-<body>
+<body data-no-footer>
 <div class="orb o1"></div><div class="orb o2"></div><div class="bg-grid"></div>
 
 <nav class="navbar">
@@ -708,8 +708,6 @@ async function init(){
   const userRaw=localStorage.getItem('user');
   if(!token||!userRaw){window.location.href='/index.html';return;}
   const user=JSON.parse(userRaw);
-  document.getElementById('nav-username').textContent=user.login;
-  document.getElementById('nav-avatar').textContent=user.login.slice(0,2).toUpperCase();
 
   playerContext=loadPlayerContext();
   if(playerContext) document.getElementById('context-badge').style.display='inline-flex';
@@ -746,6 +744,5 @@ async function init(){
 
 document.addEventListener('DOMContentLoaded',init);
 </script>
-<script src="/js/nav.js"></script>
 </body>
 </html>

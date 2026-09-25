@@ -650,19 +650,6 @@ async function init(){
   if(!token||!userRaw){window.location.href='/index.html';return;}
 
   const user=JSON.parse(userRaw);
-  document.getElementById('nav-username').textContent=user.login;
-  const navAv = document.getElementById('nav-avatar');
-const steamAv = localStorage.getItem('steam_avatar');
-if (navAv) {
-  if (steamAv) {
-    navAv.innerHTML = `<img src="${steamAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-    navAv.style.background = 'none';
-    navAv.style.overflow = 'hidden';
-    navAv.style.padding = '0';
-  } else if (user.login) {
-    navAv.textContent = user.login.slice(0,2).toUpperCase();
-  }
-}
 
   const steamId=localStorage.getItem('steam_id')||user.steam_id||'';
   document.getElementById('steam1').textContent=steamId?'Steam ID: '+steamId:'—';

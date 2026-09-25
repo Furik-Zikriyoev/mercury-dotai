@@ -178,30 +178,6 @@
     }
 
     /* FOOTER */
-    .site-footer{position:relative;z-index:2;background:#080b11;border-top:1px solid rgba(127,119,221,0.12);width:100%}
-    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:36px;padding:48px 56px 0}
-    .footer-brand-desc{font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:16px}
-    .footer-author{font-size:12px;color:var(--text-faint)}
-    .footer-author span{color:var(--accent-light);font-weight:500}
-    .footer-col-title{font-size:11px;color:var(--text-secondary);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase;font-weight:600}
-    .footer-contacts{list-style:none}
-    .footer-contacts li{margin-bottom:10px}
-    .footer-contacts a{font-size:13px;color:var(--text-muted);transition:color .15s;display:flex;align-items:center;gap:8px}
-    .footer-contacts a:hover{color:var(--accent-light)}
-    .footer-socials{display:flex;flex-direction:column;gap:8px}
-    .footer-social-link{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);transition:color .15s;text-decoration:none}
-    .footer-social-link:hover{color:var(--accent-light)}
-    .footer-social-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);flex-shrink:0;transition:background .15s,border-color .15s}
-    .footer-social-link:hover .footer-social-icon{background:var(--accent-bg);border-color:rgba(127,119,221,0.35)}
-    .footer-features{list-style:none}
-    .footer-features li{font-size:12px;color:var(--text-muted);margin-bottom:9px;display:flex;align-items:center;gap:7px}
-    .footer-features li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;opacity:0.7}
-    .footer-bottom{border-top:1px solid rgba(255,255,255,0.05);padding:20px 56px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-    .footer-copy{font-size:12px;color:var(--text-faint)}
-    .footer-copy span{color:var(--accent-light)}
-    .footer-powered{font-size:11px;color:var(--text-faint);opacity:0.6}
-    @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px;padding:36px 32px 0}.footer-bottom{padding:20px 32px 24px}}
-    @media(max-width:560px){.footer-grid{grid-template-columns:1fr;padding:28px 20px 0}.footer-bottom{padding:20px 20px 20px}}
   </style>
 </head>
 <body>
@@ -611,8 +587,6 @@ async function init() {
   if (!token || !userRaw) { window.location.href = 'index.html'; return; }
 
   const user = JSON.parse(userRaw);
-  document.getElementById('nav-username').textContent = user.login;
-  document.getElementById('nav-avatar').textContent   = user.login.slice(0,2).toUpperCase();
 
   if (!steamId) { hideOverlay(); return; }
   const id32 = Number(BigInt(steamId) - 76561197960265728n);
@@ -923,6 +897,5 @@ function renderGrid() {
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
-<script src="/js/nav.js"></script>
 </body>
 </html>

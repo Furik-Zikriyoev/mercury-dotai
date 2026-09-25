@@ -5,6 +5,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/app.js"></script>
+  <script src="/js/dota.js"></script>
   <script>DotAi.requireSession();</script>
   <title>Mercury DotAi — Профиль</title>
     <link rel="stylesheet" href="css/variables.css">
@@ -433,6 +434,8 @@
     }
 
     /* MMR period buttons */
+    .tz-select { background: rgba(255,255,255,0.04); color: var(--text-primary); border: 1px solid var(--border-subtle, rgba(255,255,255,0.1)); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 12px; cursor: pointer; }
+    .tz-select option { background: #0f1420; }
     .mmr-period-btn {
       padding: 5px 12px;
       border-radius: var(--radius-md);
@@ -474,50 +477,6 @@
       .nav-links { display: none; }
     }
 
-    /* FOOTER */
-    .site-footer {
-  position:relative; z-index:2;
-  background:#080b11;
-  border-top:1px solid rgba(127,119,221,0.12);
-  width:100%;
-}
-    .footer-grid {
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr;
-  gap:48px;
-  margin-bottom:36px;
-  padding:48px 56px 0;
-}
-    .footer-brand-desc{font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:16px}
-    .footer-author{font-size:12px;color:var(--text-faint)}
-    .footer-author span{color:var(--accent-light);font-weight:500}
-    .footer-col-title{font-size:11px;color:var(--text-secondary);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase;font-weight:600}
-    .footer-contacts{list-style:none}
-    .footer-contacts li{margin-bottom:10px}
-    .footer-contacts a{font-size:13px;color:var(--text-muted);transition:color .15s;display:flex;align-items:center;gap:8px}
-    .footer-contacts a:hover{color:var(--accent-light)}
-    .footer-socials{display:flex;flex-direction:column;gap:8px}
-    .footer-social-link{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);transition:color .15s;text-decoration:none}
-    .footer-social-link:hover{color:var(--accent-light)}
-    .footer-social-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);flex-shrink:0;transition:background .15s,border-color .15s}
-    .footer-social-link:hover .footer-social-icon{background:var(--accent-bg);border-color:rgba(127,119,221,0.35)}
-    .footer-features{list-style:none}
-    .footer-features li{font-size:12px;color:var(--text-muted);margin-bottom:9px;display:flex;align-items:center;gap:7px}
-    .footer-features li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;opacity:0.7}
-    .footer-bottom {
-  border-top:1px solid rgba(255,255,255,0.05);
-  padding:20px 56px 28px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:10px;
-}
-    .footer-copy{font-size:12px;color:var(--text-faint)}
-    .footer-copy span{color:var(--accent-light)}
-    .footer-powered{font-size:11px;color:var(--text-faint);opacity:0.6}
-    @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px}.site-footer{padding:36px 32px 24px}}
-    @media(max-width:560px){.footer-grid{grid-template-columns:1fr}.site-footer{padding:28px 20px 20px}}
   </style>
 </head>
 <body>
@@ -755,7 +714,7 @@
   <div class="wide-card" style="padding:24px 28px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
       <div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Пик MMR за выбранный период</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;"><span class="has-tip" tabindex="0" data-tip="Dota 2 не публикует точный MMR. Текущее значение — оценка OpenDota, а кривая восстановлена по рейтинговым матчам: +25 за победу, −25 за поражение.">Примерный MMR ⓘ</span></div>
         <div style="display:flex;align-items:baseline;gap:12px;">
           <span style="font-size:26px;font-weight:700;color:var(--accent-light)" id="mmr-current-big">—</span>
           <span style="font-size:12px;color:var(--text-muted)" id="mmr-peak-label"></span>
@@ -768,17 +727,16 @@
         <button class="mmr-period-btn" onclick="setMmrPeriod(0,this)">Всё время</button>
       </div>
     </div>
-    <canvas id="mmr-chart" height="110"></canvas>
-    <div id="mmr-empty" style="display:none;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">
-      Данные MMR недоступны — включи открытый профиль в Dota 2 и нажми Refresh на OpenDota
-    </div>
+    <canvas id="mmr-chart" height="170"></canvas>
+    <div id="mmr-empty" style="display:none;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;"></div>
+    <p style="font-size:11px;color:var(--text-faint);margin-top:10px;">Кривая примерная: Dota 2 не публикует точный MMR. За точку отсчёта взята оценка OpenDota, прошлые значения восстановлены по рейтинговым матчам (±25 за игру).</p>
   </div>
 
   <!-- ===== PROGRESS + RECORDS ===== -->
   <div class="section-divider"></div>
   <p class="stats-section-label">Прогресс и рекорды</p>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;">
-    <div class="stat-card"><div class="stat-card-label">Пик MMR</div><div class="stat-card-value" id="mmr-peak" style="color:var(--accent-light)">—</div><div class="stat-card-sub" id="mmr-peak-date"></div></div>
+    <div class="stat-card"><div class="stat-card-label">Лучший ранг</div><div class="stat-card-value" id="mmr-peak" style="color:var(--accent-light)">—</div><div class="stat-card-sub" id="mmr-peak-date"></div></div>
     <div class="stat-card"><div class="stat-card-label">За последние 30 дней</div><div class="stat-card-value" id="stat-30d-matches">—</div><div class="stat-card-sub" id="stat-30d-wr"></div></div>
     <div class="stat-card"><div class="stat-card-label">Макс. убийств в матче</div><div class="stat-card-value" id="rec-kills">—</div><div class="stat-card-sub">рекорд</div></div>
     <div class="stat-card"><div class="stat-card-label">Макс. GPM в матче</div><div class="stat-card-value" id="rec-gpm">—</div><div class="stat-card-sub">рекорд</div></div>
@@ -790,10 +748,11 @@
 
   <!-- ===== ROLES + GAME MODES ===== -->
   <div class="section-divider"></div>
-  <p class="stats-section-label">Роли и режимы</p>
+  <p class="stats-section-label">Позиции и режимы</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
     <div class="wide-card" style="padding:22px 24px;">
-      <div class="wide-card-title">Любимые роли</div>
+      <div class="wide-card-title"><span class="has-tip" tabindex="0" data-tip="OpenDota не сообщает позицию напрямую. Кор или саппорт — по фарму (добивания и золото в минуту), какая именно позиция — по линии в разобранных матчах, иначе по герою.">Активность по позициям ⓘ</span></div>
+      <div id="roles-sub" style="font-size:11px;color:var(--text-muted);margin-top:4px;"></div>
       <div style="display:flex;align-items:center;gap:20px;margin-top:12px;">
         <canvas id="roles-chart" width="130" height="130" style="flex-shrink:0"></canvas>
         <div id="roles-legend" style="flex:1;display:flex;flex-direction:column;gap:7px;"></div>
@@ -801,6 +760,7 @@
     </div>
     <div class="wide-card" style="padding:22px 24px;">
       <div class="wide-card-title">Режимы игры</div>
+      <div id="modes-split" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
       <div id="modes-list" style="display:flex;flex-direction:column;gap:9px;margin-top:12px;"></div>
     </div>
   </div>
@@ -809,7 +769,12 @@
   <div class="section-divider"></div>
   <p class="stats-section-label">Активность по времени суток</p>
   <div class="wide-card" style="padding:22px 24px 18px;">
-    <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">В какое время дня ты чаще всего играешь (UTC)</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text-muted);">В какое время дня ты чаще всего играешь</div>
+      <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;">Часовой пояс
+        <select id="tz-select" class="tz-select"></select>
+      </label>
+    </div>
     <canvas id="hour-chart" height="75"></canvas>
   </div>
 
@@ -937,12 +902,11 @@
   // =============================================
   //   RENDER FROM DATA
   // =============================================
-  function renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, counts) {
+  function renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, counts, monthArr = []) {
     // Destroy all existing chart instances before re-rendering
     if (mmrChartInstance)   { mmrChartInstance.destroy();   mmrChartInstance   = null; }
     if (rolesChartInstance) { rolesChartInstance.destroy(); rolesChartInstance = null; }
     if (hourChartInstance)  { hourChartInstance.destroy();  hourChartInstance  = null; }
-    allRatings = [];
       // 5. Профиль
       const profile  = player.profile || {};
       const name     = profile.personaname || localUser.login;
@@ -962,6 +926,8 @@
 
       // Аватар Steam
       if (avatar) {
+        localStorage.setItem('steam_avatar', avatar);
+        DotAi.paintNav();
         const img = document.getElementById('steam-avatar-img');
         img.src = avatar;
         img.style.display = 'block';
@@ -974,7 +940,14 @@
         setVal('profile-mmr', mmr.toLocaleString('ru'));
       } else if (player.computed_mmr) {
         const mmrEl = document.getElementById('profile-mmr');
-        if (mmrEl) { mmrEl.textContent = '≈ ' + Math.round(player.computed_mmr).toLocaleString('ru'); mmrEl.style.color='var(--accent-light)'; mmrEl.title='Расчётный MMR'; }
+        if (mmrEl) {
+          mmrEl.textContent = '≈ ' + Math.round(player.computed_mmr).toLocaleString('ru');
+          mmrEl.style.color = 'var(--accent-light)';
+          mmrEl.style.opacity = '1';
+          mmrEl.classList.add('has-tip');
+          mmrEl.dataset.tip = MMR_TIP;
+          mmrEl.tabIndex = 0;
+        }
       } else {
         const mmrEl = document.getElementById('profile-mmr');
         if (mmrEl) { mmrEl.textContent = 'Калибровка'; mmrEl.style.fontSize='13px'; mmrEl.style.color='var(--accent-light)'; }
@@ -983,13 +956,8 @@
       setVal('profile-flag',    countryToFlag(country));
       setVal('profile-country', country || '—');
       if (profileRankTier) {
-        const _m = Math.floor(profileRankTier/10), _s = profileRankTier%10;
-        const _N = {1:'Herald',2:'Guardian',3:'Crusader',4:'Archon',5:'Legend',6:'Ancient',7:'Divine',8:'Immortal'};
         const _el = document.getElementById('profile-rank');
-        if (_el && _N[_m]) {
-          const _si = _m<8&&_s>0?`<img src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_star_${_s}.png" style="width:14px;height:14px;vertical-align:middle;margin-left:2px">`:'';
-          _el.innerHTML=`<img src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_${_m}.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${_N[_m]} ${_m<8&&_s>0?_s:''}${_si}`;
-        }
+        if (_el) { _el.innerHTML = Dota.rankHtml(profileRankTier); _el.style.opacity = '1'; }
       } else { setVal('profile-rank', mmr ? mmrToRank(mmr) : 'Некалиброван'); }
       document.getElementById('steam-profile-link').href = steamUrl;
 
@@ -1092,99 +1060,40 @@
         renderDots('streak-maxlose-dots', maxLose,   'l');
       }
 
-      // ===== NEW CHARTS =====
-      // MMR chart
-      const ratingsForChart = ratingsArr.length ? ratingsArr : (apiDown ? MOCK.ratings : []);
-      if (ratingsForChart.length) {
-        // rank_tier: first digit=medal(1-8), second=stars(1-5)
-        const RANK_NAMES_MAP = {1:'Herald',2:'Guardian',3:'Crusader',4:'Archon',5:'Legend',6:'Ancient',7:'Divine',8:'Immortal'};
-        function decodeRankEntry(r) {
-          const t = typeof r.time === 'string' ? new Date(r.time).getTime()/1000 : r.time;
-          return { time: t, tier: r.rank_tier || r.solo_competitive_rank || r.competitive_rank || 0 };
-        }
-        function tierToLabel(tier) {
-          if (!tier) return null;
-          const medal = Math.floor(tier/10), stars = tier%10;
-          const name = RANK_NAMES_MAP[medal];
-          if (!name) return null;
-          return medal===8 ? 'Immortal' : `${name} ${stars}`;
-        }
-
-        allRatings = ratingsForChart.map(decodeRankEntry).sort((a,b) => a.time - b.time);
-
-        // Peak Rank (for rank badge in profile)
-        const peakEntry = allRatings.reduce((best,r) => r.tier > best.tier ? r : best, allRatings[0]);
-        const peakLabel = tierToLabel(peakEntry?.tier);
-
-        // Current rank badge in profile card
-        const lastRating = allRatings[allRatings.length-1];
-        const currentLabel = tierToLabel(lastRating?.tier);
-        if (currentLabel && lastRating?.tier) {
-          const medal = Math.floor(lastRating.tier / 10);
-          const stars = lastRating.tier % 10;
-          const rankEl = document.getElementById('profile-rank');
-          if (rankEl) {
-            const CDN = 'https://www.opendota.com/assets/images/dota2/rank_icons';
-            const starImg = medal < 8 && stars > 0 ? `<img src="${CDN}/rank_star_${stars}.png" style="width:14px;height:14px;vertical-align:middle;margin-left:2px;filter:brightness(1.2)">` : '';
-            rankEl.innerHTML = `<img src="${CDN}/rank_icon_${medal}.png" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">${currentLabel}${starImg}`;
-          }
-        }
-
-        // Peak MMR card — show peak rank title + date (number MMR not available without calibration)
-        const peakMmrEl = document.getElementById('mmr-peak');
-        const peakDateEl = document.getElementById('mmr-peak-date');
-        const peakLabelEl = document.getElementById('mmr-peak-label-card');
-        if (peakLabel) {
-          if (peakMmrEl) {
-            const pm = Math.floor((peakEntry?.tier||0)/10);
-            const ps = (peakEntry?.tier||0)%10;
-            const CDN2 = 'https://www.opendota.com/assets/images/dota2/rank_icons';
-            const pStar = pm < 8 && ps > 0 ? `<img src="${CDN2}/rank_star_${ps}.png" style="width:14px;height:14px;vertical-align:middle;margin-left:3px">` : '';
-            peakMmrEl.innerHTML = pm ? `<img src="${CDN2}/rank_icon_${pm}.png" style="width:22px;height:22px;vertical-align:middle;margin-right:5px">${peakLabel}${pStar}` : '—';
-          }
-          if (peakDateEl) {
-            const pd = new Date(peakEntry.time * 1000);
-            peakDateEl.textContent = pd.toLocaleDateString('ru', {month:'long', year:'numeric'});
-            peakDateEl.style.color = 'var(--text-muted)';
-          }
-        } else {
-          if (peakMmrEl) peakMmrEl.textContent = '—';
-          if (peakDateEl) { peakDateEl.textContent = '—'; peakDateEl.style.color='var(--text-muted)'; }
-        }
-
-        const recent30 = allRatings.filter(r => (Date.now()/1000 - r.time) <= 30*86400);
-        renderMmrChart(recent30.length ? 30 : 0);
-        if (!recent30.length) {
-          document.querySelectorAll('.mmr-period-btn').forEach(b => b.classList.remove('active'));
-          const allBtn = document.querySelector('.mmr-period-btn:last-child');
-          if (allBtn) allBtn.classList.add('active');
-        }
+      // ===== ГРАФИКИ =====
+      // Лучший ранг: история рангов OpenDota плюс текущий ранг
+      const tierHistory = ratingsArr
+        .map(r => ({ time: typeof r.time === 'string' ? new Date(r.time).getTime()/1000 : r.time, tier: r.rank_tier || 0 }))
+        .filter(r => r.tier);
+      if (profileRankTier) tierHistory.push({ time: Date.now()/1000, tier: profileRankTier });
+      const peakMmrEl = document.getElementById('mmr-peak');
+      const peakDateEl = document.getElementById('mmr-peak-date');
+      if (tierHistory.length) {
+        const best = tierHistory.reduce((a, r) => r.tier > a.tier ? r : a);
+        peakMmrEl.innerHTML = Dota.rankHtml(best.tier, 22);
+        peakDateEl.textContent = new Date(best.time * 1000).toLocaleDateString('ru', { month:'long', year:'numeric' });
       } else {
-        document.getElementById('mmr-chart').style.display = 'none';
-        const emptyEl = document.getElementById('mmr-empty');
-        if (emptyEl) {
-          emptyEl.style.display = 'block';
-          emptyEl.innerHTML = '⚙️ Идёт калибровка MMR — когда закончится, обновите страницу и данные появятся автоматически.';
-          emptyEl.style.color = 'var(--accent-light)';
-        }
-        setVal('mmr-peak', '—');
-        const peakDateEl2 = document.getElementById('mmr-peak-date');
-        if (peakDateEl2) { peakDateEl2.textContent = 'Идёт калибровка'; peakDateEl2.style.color='var(--accent-light)'; }
+        peakMmrEl.textContent = '—';
+        peakDateEl.textContent = '';
       }
+      peakMmrEl.style.opacity = '1';
 
-      // Records, roles, modes, hours, heatmap — из всех матчей
+      // Примерная динамика MMR по рейтинговым матчам
+      mmrState = {
+        anchor: Math.round(player.computed_mmr || 0),
+        ranked: matchesArr.filter(m => Dota.isRanked(m) && m.start_time).sort((a, b) => a.start_time - b.start_time),
+      };
+      renderMmrChart(mmrPeriod);
+
+      // Рекорды, режимы, время — по всем матчам; позиции — за 30 дней
       const chartData2 = matchesArr.length ? matchesArr : recentArr;
       if (chartData2.length) {
         renderRecords(chartData2);
-        renderRoles(chartData2, counts);
         renderModes(chartData2, counts);
-        const hasTime = chartData2.some(m => m.start_time);
-        if (hasTime) { renderHourChart(chartData2); renderHeatmap(chartData2); }
-        else if (recentArr.some(m=>m.start_time)) { renderHourChart(recentArr); renderHeatmap(recentArr); }
+        timeData = chartData2.some(m => m.start_time) ? chartData2 : recentArr;
+        renderTimeCharts();
       }
-
-
-
+      renderPositions(monthArr);
 
       // 30-day progress
       load30Days(id32);
@@ -1207,10 +1116,6 @@
     }
 
     const localUser = JSON.parse(userRaw);
-
-    // 2. Заполняем навбар СРАЗУ логином из БД (не ник Steam)
-    setVal('nav-username', localUser.login);
-    document.getElementById('nav-avatar').textContent = getInitials(localUser.login);
 
     // 3. Показываем скелетон пока грузится
     setLoading('profile-name', localUser.login);
@@ -1292,12 +1197,12 @@
       // Проверяем кэш
       const cached = loadCache();
       if (cached && !window._forceRefresh) {
-        const { player, recent, matches, ratings, wl, counts: cachedCounts } = cached;
+        const { player, recent, matches, ratings, wl, counts: cachedCounts, month } = cached;
         const matchesArr = Array.isArray(matches) ? matches : [];
         const recentArr  = Array.isArray(recent)  ? recent  : [];
         const ratingsArr = Array.isArray(ratings)  ? ratings : [];
         // Восстанавливаем данные из кэша и рендерим
-        renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, cachedCounts || null);
+        renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, cachedCounts || null, Array.isArray(month) ? month : []);
 
         // Restore records from cache
         if (cached.records) {
@@ -1319,13 +1224,15 @@
 
       // Грузим всё параллельно
       // Запрашиваем матчи с нужными полями
-      const [playerRaw, recentRaw, matchesRaw, ratingsRaw, wlRaw, countsRaw] = await Promise.all([
+      const MONTH_FIELDS = ['hero_id','start_time','duration','lane_role','last_hits','gold_per_min','lobby_type','radiant_win','player_slot'].map(f => 'project='+f).join('&');
+      const [playerRaw, recentRaw, matchesRaw, ratingsRaw, wlRaw, countsRaw, monthRaw] = await Promise.all([
         safeFetch(`${BASE}`,                                                        null),
         safeFetch(`${BASE}/recentMatches`,                                          null),
         safeFetch(`${BASE}/matches?significant=1`, null),
         safeFetch(`${BASE}/ratings`,                                                null),
         safeFetch(`${BASE}/wl`,                                                     null),
         safeFetch(`${BASE}/counts`,                                                 null),
+        safeFetch(`${BASE}/matches?date=30&${MONTH_FIELDS}`,                        null),
       ]);
 
       // Если API упал — используем мок
@@ -1357,10 +1264,11 @@
       const matchesArr = Array.isArray(matches) ? matches : [];
       const recentArr  = Array.isArray(recent)  ? recent  : [];
       const ratingsArr = Array.isArray(ratings)  ? ratings : [];
+      const monthArr   = Array.isArray(monthRaw) ? monthRaw : [];
 
       // Сохраняем в кэш если данные реальные
       if (!apiDown) {
-        saveCache({ player, wl, matches: matchesArr, recent: recentArr, ratings: ratingsArr, counts: countsApi });
+        saveCache({ player, wl, matches: matchesArr, recent: recentArr, ratings: ratingsArr, counts: countsApi, month: monthArr });
         const cacheBarEl = document.getElementById('cache-bar');
         const cacheAgeEl = document.getElementById('cache-age');
         if (cacheBarEl) cacheBarEl.style.display = 'flex';
@@ -1368,7 +1276,7 @@
       }
 
       // Рендерим данные
-      renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, countsApi);
+      renderFromData(player, wl, matchesArr, recentArr, ratingsArr, steamId, id32, countsApi, monthArr);
 
       // Records — top match per field
       try {
@@ -1434,219 +1342,266 @@
 let mmrChartInstance = null;
 let rolesChartInstance = null;
 let hourChartInstance = null;
-let allRatings = [];
-const GAME_MODES = {
-  0:'Unknown',1:'All Pick',2:'Captains Mode',3:'Random Draft',
-  4:'Single Draft',5:'All Random',12:'Least Played',14:'Random Draft',
-  16:'Captains Draft',22:'Ranked All Pick',23:'Turbo'
-};
-const LANE_ROLES = {1:'Safe Lane',2:'Mid Lane',3:'Off Lane',4:'Soft Sup.',5:'Hard Sup.'};
-const ROLE_COLORS = ['#7F77DD','#4ade80','#f87171','#facc15','#60a5fa'];
+let mmrState = { anchor: 0, ranked: [] };
+let mmrPeriod = 30;
+let timeData = [];
+
+const MMR_TIP = 'Примерное значение от OpenDota: Dota 2 не публикует точный MMR игроков, поэтому его оценивают по рангу и результатам матчей.';
+const CHART_TOOLTIP = { backgroundColor:'#0f1420', borderColor:'rgba(127,119,221,0.3)', borderWidth:1, titleColor:'#AFA9EC', bodyColor:'#e8e6f8' };
+const TICK = { color:'#5f5c80', font:{ size:10 } };
+const GRID = { color:'rgba(255,255,255,0.04)' };
+
+const isWin = m => (m.player_slot < 128) === m.radiant_win;
+const signed = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString('ru');
 
 // =============================================
 //   MMR CHART
 // =============================================
+// Точный MMR недоступен: берём оценку OpenDota как текущее значение
+// и восстанавливаем прошлое по рейтинговым матчам, ±25 за игру
+const MMR_PER_GAME = 25;
+
 function setMmrPeriod(days, btn) {
   document.querySelectorAll('.mmr-period-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  mmrPeriod = days;
   renderMmrChart(days);
 }
 
+// Шаг шкалы 50; для длинных периодов крупнее, чтобы подписей было не больше ~24
+function niceStep(range) {
+  return [50, 100, 250, 500, 1000, 2500].find(s => range / s <= 22) || 5000;
+}
+
 function renderMmrChart(days) {
-  if (!allRatings || !allRatings.length) {
-    document.getElementById('mmr-chart').style.display = 'none';
-    document.getElementById('mmr-empty').style.display = 'block';
-    return;
-  }
+  const canvas = document.getElementById('mmr-chart');
+  const empty  = document.getElementById('mmr-empty');
+  const { anchor, ranked } = mmrState;
+  const DAY = 86400;
   const now = Date.now() / 1000;
-  const filtered = days === 0
-    ? allRatings
-    : allRatings.filter(r => (now - r.time) <= days * 86400);
+  const start = days ? now - days * DAY : ranked[0]?.start_time;
+  const inPeriod = ranked.filter(m => m.start_time >= start);
 
-  if (!filtered.length) {
-    document.getElementById('mmr-chart').style.display = 'none';
-    document.getElementById('mmr-empty').style.display = 'block';
+  if (!ranked.length || !inPeriod.length) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    empty.textContent = ranked.length ? 'За этот период нет рейтинговых матчей.' : 'Нет рейтинговых матчей — график строится по ним.';
+    document.getElementById('mmr-current-big').textContent = anchor ? '≈ ' + anchor.toLocaleString('ru') : '—';
+    document.getElementById('mmr-peak-label').textContent = '';
     return;
   }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
 
-  document.getElementById('mmr-chart').style.display = 'block';
-  document.getElementById('mmr-empty').style.display = 'none';
+  // MMR после каждой игры — идём от текущего значения назад
+  const after = new Array(ranked.length);
+  let v = anchor;
+  for (let i = ranked.length - 1; i >= 0; i--) {
+    after[i] = v;
+    v -= isWin(ranked[i]) ? MMR_PER_GAME : -MMR_PER_GAME;
+  }
+  const beforeFirst = v;
 
-  const labels = filtered.map(r => {
-    const d = new Date(r.time * 1000);
-    return d.toLocaleDateString('ru', { day:'numeric', month:'short' });
+  // Не больше ~30 точек: 30 дней — каждый день, 3 месяца — каждые 3 дня и т.д.
+  const totalDays = Math.max(1, Math.ceil((now - start) / DAY));
+  const step = Math.max(1, Math.ceil(totalDays / 30)) * DAY;
+  const times = [];
+  for (let t = start; t < now; t += step) times.push(t);
+  times.push(now);
+
+  let j = 0, val = beforeFirst;
+  const values = times.map(t => {
+    while (j < ranked.length && ranked[j].start_time <= t) { val = after[j]; j++; }
+    return val;
   });
-  const tiers = filtered.map(r=>r.tier||0).filter(v=>v>0);
-  const peakTier = tiers.length?Math.max(...tiers):0;
-  if (peakTier) {
-    const pm2=Math.floor(peakTier/10), ps2=peakTier%10;
-    const RN={1:'Herald',2:'Guardian',3:'Crusader',4:'Archon',5:'Legend',6:'Ancient',7:'Divine',8:'Immortal'};
-    const si2=pm2<8&&ps2>0?`<img src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_star_${ps2}.png" style="width:16px;height:16px;vertical-align:middle;margin-left:3px">`:'';
-    document.getElementById('mmr-current-big').innerHTML=`<img src="https://www.opendota.com/assets/images/dota2/rank_icons/rank_icon_${pm2}.png" style="width:28px;height:28px;vertical-align:middle;margin-right:6px">${RN[pm2]||'?'} ${pm2<8&&ps2>0?ps2:''}${si2}`;
-  } else { document.getElementById('mmr-current-big').textContent='—'; }
-  document.getElementById('mmr-peak-label').textContent='пик за период';
 
-  const ctx = document.getElementById('mmr-chart').getContext('2d');
+  const zone = Dota.tz();
+  const longRange = totalDays > 400;
+  const labels = times.map(t => new Date(t * 1000).toLocaleDateString('ru',
+    longRange ? { month:'short', year:'2-digit', timeZone: zone } : { day:'numeric', month:'short', timeZone: zone }));
+
+  const wins = inPeriod.filter(isWin).length;
+  const change = values[values.length - 1] - values[0];
+  document.getElementById('mmr-current-big').textContent = anchor ? '≈ ' + anchor.toLocaleString('ru') : signed(change);
+  const lbl = document.getElementById('mmr-peak-label');
+  lbl.textContent = `за период ${signed(change)} · ${inPeriod.length} игр (${wins}–${inPeriod.length - wins})`;
+  lbl.style.color = change >= 0 ? 'var(--win)' : 'var(--lose)';
+
+  const lo = Math.min(...values), hi = Math.max(...values);
+  const yStep = niceStep(hi - lo || 1);
+  const fmtY = v => anchor ? Math.round(v).toLocaleString('ru') : signed(Math.round(v));
+
   if (mmrChartInstance) mmrChartInstance.destroy();
-  mmrChartInstance = new Chart(ctx, {
+  mmrChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data: filtered.map(r => r.tier || null),
-        borderColor: '#7F77DD',
-        backgroundColor: 'rgba(127,119,221,0.08)',
-        fill: true,
-        tension: 0.35,
-        pointRadius: filtered.length > 80 ? 0 : 3,
-        pointHoverRadius: 5,
-        pointBackgroundColor: '#7F77DD',
-        borderWidth: 2,
-      }]
-    },
+    data: { labels, datasets: [{
+      data: values,
+      borderColor: '#7F77DD', backgroundColor: 'rgba(127,119,221,0.08)', fill: true,
+      tension: 0.25, borderWidth: 2,
+      pointRadius: values.length > 40 ? 0 : 2.5, pointHoverRadius: 5, pointBackgroundColor: '#7F77DD',
+    }]},
     options: {
       responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: '#0f1420', borderColor: 'rgba(127,119,221,0.3)',
-        borderWidth: 1, titleColor: '#AFA9EC', bodyColor: '#e8e6f8',
-        callbacks: { label: ctx => {
-          const tier = ctx.parsed.y;
-          if (!tier) return '';
-          const medal = Math.floor(tier/10);
-          const stars = tier%10;
-          const names = {1:'Herald',2:'Guardian',3:'Crusader',4:'Archon',5:'Legend',6:'Ancient',7:'Divine',8:'Immortal'};
-          return ' Ранг: ' + (names[medal]||'?') + (medal<8?' '+stars+'★':'');
-        }}
-      }},
+      plugins: { legend: { display: false }, tooltip: { ...CHART_TOOLTIP, callbacks: {
+        label: c => ' ≈ ' + fmtY(c.parsed.y) + (anchor ? ' MMR' : ''),
+      }}},
       scales: {
-        x: { ticks: { color: '#5f5c80', maxTicksLimit: 8, font:{size:11} }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#5f5c80', font:{size:11}, callback: v => {
-          const medal = Math.floor(v/10);
-          const names = {1:'Her',2:'Grd',3:'Crs',4:'Arch',5:'Leg',6:'Anc',7:'Div',8:'Imm'};
-          return names[medal] || v;
-        }}, grid: { color: 'rgba(255,255,255,0.04)' } }
-      }
-    }
+        x: { ticks: { ...TICK, autoSkip: false, maxRotation: 60, minRotation: 45 }, grid: GRID },
+        y: {
+          min: Math.floor(lo / yStep) * yStep - yStep,
+          max: Math.ceil(hi / yStep) * yStep + yStep,
+          ticks: { ...TICK, stepSize: yStep, callback: fmtY },
+          grid: GRID,
+        },
+      },
+    },
   });
 }
 
 // =============================================
-//   ROLES DONUT
+//   POSITIONS DONUT (30 дней)
 // =============================================
-function renderRoles(matches, countsData) {
-  const counts = {};
+const POSITION_COLORS = { 1:'#4ade80', 2:'#60a5fa', 3:'#f87171', 4:'#facc15', 5:'#c084fc' };
 
-  // Prefer /counts API
-  if (countsData && countsData.lane_role) {
-    Object.entries(countsData.lane_role).forEach(([role, obj]) => {
-      const r = parseInt(role);
-      if (r >= 1 && r <= 5) { // skip role 0 (unknown)
-        counts[r] = typeof obj === 'object' ? (obj.games || 0) : obj;
-      }
-    });
-  } else {
-    matches.forEach(m => {
-      const r = m.lane_role;
-      if (r) counts[r] = (counts[r]||0) + 1;
-    });
+async function renderPositions(month) {
+  const legend = document.getElementById('roles-legend');
+  const sub = document.getElementById('roles-sub');
+  if (!month.length) {
+    legend.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Нет матчей за последние 30 дней</span>';
+    sub.textContent = '';
+    return;
   }
-  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const heroes = await Dota.heroes();
+  const stat = {};
+  [1,2,3,4,5].forEach(p => stat[p] = { games: 0, wins: 0 });
+  month.forEach(m => {
+    const p = Dota.estimatePosition(m, heroes[m.hero_id]?.name);
+    if (!stat[p]) return;
+    stat[p].games++;
+    if (isWin(m)) stat[p].wins++;
+  });
+  const total = month.length;
+  sub.textContent = `последние 30 дней · ${total} матчей`;
 
-  const ctx = document.getElementById('roles-chart').getContext('2d');
+  const order = [1,2,3,4,5];
   if (rolesChartInstance) { rolesChartInstance.destroy(); rolesChartInstance = null; }
-  rolesChartInstance = new Chart(ctx, {
+  rolesChartInstance = new Chart(document.getElementById('roles-chart').getContext('2d'), {
     type: 'doughnut',
     data: {
-      labels: sorted.map(([r]) => LANE_ROLES[r] || 'Unknown'),
-      datasets: [{ data: sorted.map(([,v])=>v), backgroundColor: ROLE_COLORS, borderWidth: 0, hoverOffset: 4 }]
+      labels: order.map(Dota.positionName),
+      datasets: [{ data: order.map(p => stat[p].games), backgroundColor: order.map(p => POSITION_COLORS[p]), borderWidth: 0, hoverOffset: 4 }],
     },
     options: {
       responsive: false, cutout: '68%',
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: '#0f1420', borderColor: 'rgba(127,119,221,0.3)', borderWidth: 1,
-        titleColor: '#AFA9EC', bodyColor: '#e8e6f8',
-        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} матчей (${Math.round(ctx.parsed/total*100)}%)` }
-      }}
-    }
+      plugins: { legend: { display: false }, tooltip: { ...CHART_TOOLTIP, callbacks: {
+        label: c => ` ${c.label}: ${c.parsed} матчей (${Math.round(c.parsed / total * 100)}%)`,
+      }}},
+    },
   });
 
-  const legend = document.getElementById('roles-legend');
-  legend.innerHTML = sorted.slice(0,5).map(([r,v], i) => `
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div style="width:10px;height:10px;border-radius:2px;background:${ROLE_COLORS[i]};flex-shrink:0"></div>
-      <span style="font-size:12px;color:var(--text-secondary);flex:1">${LANE_ROLES[r]||'?'}</span>
-      <span style="font-size:12px;color:var(--text-muted)">${Math.round(v/total*100)}%</span>
-    </div>
-  `).join('');
+  legend.innerHTML = order.map(p => {
+    const s = stat[p];
+    const wr = s.games ? Math.round(s.wins / s.games * 100) + '% WR' : '';
+    return `<div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:10px;height:10px;border-radius:2px;background:${POSITION_COLORS[p]};flex-shrink:0"></div>
+      <span style="font-size:12px;color:var(--text-secondary);flex:1">${Dota.positionName(p)}</span>
+      <span style="font-size:11px;color:var(--text-muted);min-width:48px;text-align:right">${wr}</span>
+      <span style="font-size:12px;color:var(--text-secondary);min-width:34px;text-align:right">${Math.round(s.games / total * 100)}%</span>
+    </div>`;
+  }).join('');
 }
 
 // =============================================
 //   GAME MODES
 // =============================================
 function renderModes(matches, countsData) {
-  let modeCounts = {};
+  const modeCounts = {};
+  const lobby = { ranked: 0, normal: 0, other: 0 };
+  const addLobby = (type, n) => {
+    if (+type === 7) lobby.ranked += n;
+    else if (+type === 0) lobby.normal += n;
+    else lobby.other += n;
+  };
 
-  // Prefer /counts API (has all matches), fallback to computed from matches array
+  // /counts охватывает все матчи; массив матчей — запасной вариант
   if (countsData && countsData.game_mode) {
-    Object.entries(countsData.game_mode).forEach(([modeId, obj]) => {
-      const name = GAME_MODES[parseInt(modeId)];
-      if (!name) return; // skip unknown modes
-      const cnt = typeof obj === 'object' ? (obj.games || 0) : obj;
-      modeCounts[name] = (modeCounts[name]||0) + cnt;
+    Object.entries(countsData.game_mode).forEach(([id, obj]) => {
+      const name = Dota.modeName(+id);
+      modeCounts[name] = (modeCounts[name] || 0) + (obj.games || 0);
     });
+    Object.entries(countsData.lobby_type || {}).forEach(([type, obj]) => addLobby(type, obj.games || 0));
   } else {
     matches.forEach(m => {
-      const name = GAME_MODES[m.game_mode] || 'Другое';
-      modeCounts[name] = (modeCounts[name]||0) + 1;
+      const name = Dota.modeName(m.game_mode);
+      modeCounts[name] = (modeCounts[name] || 0) + 1;
+      addLobby(m.lobby_type, 1);
     });
   }
 
-  const sorted = Object.entries(modeCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const sorted = Object.entries(modeCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
   const max = sorted[0]?.[1] || 1;
+  const parts = [`Рейтинговые: <b>${lobby.ranked.toLocaleString('ru')}</b>`, `Обычные: <b>${lobby.normal.toLocaleString('ru')}</b>`];
+  if (lobby.other) parts.push(`Другие лобби: <b>${lobby.other.toLocaleString('ru')}</b>`);
+  document.getElementById('modes-split').innerHTML = parts.join(' · ');
 
-  document.getElementById('modes-list').innerHTML = sorted.map(([name,cnt]) => `
+  document.getElementById('modes-list').innerHTML = sorted.map(([name, cnt]) => `
     <div class="mode-row">
       <span class="mode-name">${name}</span>
-      <div class="mode-bar-wrap"><div class="mode-bar" style="width:${Math.round(cnt/max*100)}%"></div></div>
-      <span class="mode-count">${cnt}</span>
+      <div class="mode-bar-wrap"><div class="mode-bar" style="width:${Math.round(cnt / max * 100)}%"></div></div>
+      <span class="mode-count">${cnt.toLocaleString('ru')}</span>
     </div>
   `).join('');
 }
 
 // =============================================
-//   HOUR CHART
+//   ВРЕМЯ: часы и тепловая карта в выбранном поясе
 // =============================================
-function renderHourChart(matches) {
-  const hours = new Array(24).fill(0);
-  matches.forEach(m => {
-    if (m.start_time) hours[new Date(m.start_time*1000).getUTCHours()]++;
+function setupTzSelect() {
+  const sel = document.getElementById('tz-select');
+  if (!sel || sel.options.length) return;
+  const current = Dota.tz();
+  const options = Dota.tzOptions();
+  if (!options.some(o => o.value === current)) options.unshift({ value: current, label: Dota.tzLabel(current) });
+  sel.innerHTML = options.map(o => `<option value="${o.value}"${o.value === current ? ' selected' : ''}>${o.label}</option>`).join('');
+  sel.addEventListener('change', () => {
+    Dota.setTz(sel.value);
+    renderTimeCharts();
+    renderMmrChart(mmrPeriod);
   });
-  const ctx = document.getElementById('hour-chart').getContext('2d');
+}
+
+function renderTimeCharts() {
+  setupTzSelect();
+  if (!timeData.length) return;
+  renderHourChart(timeData);
+  renderHeatmap(timeData);
+}
+
+function renderHourChart(matches) {
+  const zone = Dota.tz();
+  const hours = new Array(24).fill(0);
+  matches.forEach(m => { if (m.start_time) hours[Dota.hourOf(m.start_time, zone)]++; });
+  const peak = Math.max(...hours);
+
   if (hourChartInstance) { hourChartInstance.destroy(); hourChartInstance = null; }
-  hourChartInstance = new Chart(ctx, {
+  hourChartInstance = new Chart(document.getElementById('hour-chart').getContext('2d'), {
     type: 'bar',
     data: {
-      labels: Array.from({length:24}, (_,i) => i+'h'),
+      labels: Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')),
       datasets: [{
         data: hours,
-        backgroundColor: hours.map(v => v === Math.max(...hours) ? '#7F77DD' : 'rgba(127,119,221,0.35)'),
-        borderRadius: 4,
-        borderSkipped: false,
-      }]
+        backgroundColor: hours.map(v => v === peak ? '#7F77DD' : 'rgba(127,119,221,0.35)'),
+        borderRadius: 4, borderSkipped: false,
+      }],
     },
     options: {
       responsive: true, maintainAspectRatio: true,
-      plugins: { legend:{display:false}, tooltip:{
-        backgroundColor:'#0f1420', borderColor:'rgba(127,119,221,0.3)', borderWidth:1,
-        titleColor:'#AFA9EC', bodyColor:'#e8e6f8',
-        callbacks:{ title: ctx => ctx[0].label + ':00', label: ctx => ' ' + ctx.parsed.y + ' матчей' }
-      }},
-      scales: {
-        x: { ticks:{color:'#5f5c80',font:{size:10}}, grid:{display:false} },
-        y: { ticks:{color:'#5f5c80',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'} }
-      }
-    }
+      plugins: { legend: { display: false }, tooltip: { ...CHART_TOOLTIP, callbacks: {
+        title: c => `${c[0].label}:00–${c[0].label}:59`,
+        label: c => ' ' + c.parsed.y.toLocaleString('ru') + ' матчей',
+      }}},
+      scales: { x: { ticks: TICK, grid: { display: false } }, y: { ticks: TICK, grid: GRID } },
+    },
   });
 }
 
@@ -1661,7 +1616,7 @@ function renderHeatmap(matches) {
   matches.forEach(m => {
     const d = new Date(m.start_time * 1000);
     if (d < yearAgo) return;
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const key = Dota.dayOf(m.start_time);
     counts[key] = (counts[key]||0) + 1;
   });
 
@@ -1796,45 +1751,5 @@ async function load30Days(id32) {
 
 </script>
 
-<!-- FOOTER -->
-<footer class="site-footer" style="width:100%;box-sizing:border-box;">
-  <div class="footer-grid">
-    <div>
-      <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
-        <svg width="26" height="26" viewBox="0 0 56 56" fill="none"><defs><radialGradient id="fpg2" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#d0ccfa"/><stop offset="55%" stop-color="#8B83E0"/><stop offset="100%" stop-color="#3D3699"/></radialGradient></defs><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(127,119,221,0.2)" stroke-width="0.6"/><circle cx="28" cy="6" r="2" fill="#AFA9EC"/><circle cx="50" cy="28" r="2" fill="#AFA9EC"/><circle cx="28" cy="50" r="2" fill="#AFA9EC"/><circle cx="6" cy="28" r="2" fill="#AFA9EC"/><circle cx="43.6" cy="11.4" r="1.4" fill="#7F77DD" opacity="0.8"/><circle cx="43.6" cy="44.6" r="1.4" fill="#7F77DD" opacity="0.8"/><circle cx="12.4" cy="44.6" r="1.4" fill="#7F77DD" opacity="0.8"/><circle cx="12.4" cy="11.4" r="1.4" fill="#7F77DD" opacity="0.8"/><line x1="28" y1="8" x2="42" y2="13" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><line x1="44" y1="13" x2="48" y2="26" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><line x1="48" y1="30" x2="44" y2="43" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><line x1="42" y1="43" x2="28" y2="48" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><line x1="14" y1="43" x2="8" y2="30" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><line x1="8" y1="26" x2="14" y2="13" stroke="rgba(127,119,221,0.4)" stroke-width="0.6"/><circle cx="28" cy="28" r="11" fill="url(#fpg2)"/><ellipse cx="23.5" cy="23" rx="4" ry="2.6" fill="rgba(255,255,255,0.2)" transform="rotate(-30,23.5,23)"/></svg>
-        <span style="font-size:18px;font-weight:600;color:var(--text-primary)">Mercury <span style="color:var(--accent-light)">DotAi</span></span>
-      </div>
-      <p class="footer-brand-desc">Интеллектуальная система персональной аналитики для игроков Dota 2. Дипломная работа по разработке ИИ-сервиса.</p>
-      <p class="footer-author">Разработано: <span>Furuzonfar Zikriyoev</span></p>
-    </div>
-    <div>
-      <p class="footer-col-title">Контакты</p>
-      <ul class="footer-contacts">
-        <li><a href="mailto:zff2304@mail.ru"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.2"/></svg>zff2304@mail.ru</a></li>
-        <li><a href="tel:+79969025411"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 2h3l1.5 3.5-1.5 1a8 8 0 003.5 3.5l1-1.5L14 10v3a1 1 0 01-1 1C6 14 2 10 2 3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>+7 996 902-54-11</a></li>
-      </ul>
-    </div>
-    <div>
-      <p class="footer-col-title">Соцсети</p>
-      <div class="footer-socials">
-        <a href="https://vk.com/mercury_tjk" target="_blank" class="footer-social-link"><div class="footer-social-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13.16 17c-.24 0-.32-.16-.52-.5-.68-1.14-1.44-2.02-1.88-2.56-.2-.26-.34-.36-.52-.36-.22 0-.28.14-.28.52v2.24c0 .42-.14.66-.98.66-1.4 0-2.94-.86-4.04-2.44C3.82 12.82 3 10.6 3 8.6c0-.28.1-.5.52-.5h1.76c.38 0 .52.18.66.58.72 2.08 1.94 3.9 2.44 3.9.18 0 .26-.08.26-.56V9.28c-.06-1-.58-1.08-.58-1.44 0-.2.16-.4.42-.4h2.76c.34 0 .44.18.44.56v3.02c0 .34.16.46.26.46.18 0 .34-.12.68-.46 1.04-1.16 1.78-2.96 1.78-2.96.1-.22.28-.44.66-.44h1.76c.52 0 .64.28.52.56-.24.98-2.36 3.96-2.36 3.96-.2.3-.26.44 0 .78.18.24.78.76 1.18 1.22.74.84 1.3 1.54 1.46 2.04.16.46-.08.7-.52.7H13.16z" fill="#AFA9EC"/></svg></div>VK</a>
-        <a href="https://instagram.com/mercury.1.9" target="_blank" class="footer-social-link"><div class="footer-social-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="6" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke="#AFA9EC" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="#AFA9EC"/></svg></div>Instagram</a>
-        <a href="https://t.me/mercury23" target="_blank" class="footer-social-link"><div class="footer-social-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22l-4-9-9-4 20-7z" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Telegram</a>
-      </div>
-    </div>
-    <div>
-      <p class="footer-col-title">Возможности</p>
-      <ul class="footer-features">
-        <li>ИИ-анализ ошибок</li><li>Рекомендации героев</li><li>ML-предсказания</li>
-        <li>Лучшее время игры</li><li>Сравнение игроков</li><li>Тренды прогресса</li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p class="footer-copy">© 2026 <span>Mercury DotAi</span> · Дипломная работа · <span>Furuzonfar Zikriyoev</span></p>
-    <p class="footer-powered">Powered by OpenDota API</p>
-  </div>
-</footer>
-<script src="/js/nav.js"></script>
 </body>
 </html>

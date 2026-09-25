@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/app.js"></script>
+  <script src="/js/dota.js"></script>
   <script>DotAi.requireSession();</script>
   <title>Mercury DotAi — ИИ-анализ</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -263,7 +264,6 @@
 //   STATE
 // =============================================
 const CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes';
-const ROLE_NAMES = {1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
 const AI_CACHE_KEY = 'mercury_ai_results';
 
 let heroMetaMap = {};
@@ -312,8 +312,6 @@ async function init() {
   if (!token || !userRaw) { window.location.href = '/index.html'; return; }
 
   const user = JSON.parse(userRaw);
-  document.getElementById('nav-username').textContent = user.login;
-  document.getElementById('nav-avatar').textContent   = user.login.slice(0,2).toUpperCase();
 
   // Load hero meta
   try {
@@ -354,24 +352,24 @@ function loadCachedData() {
         sumK += m.kills||0; sumD += m.deaths||0; sumA += m.assists||0;
         if (m.gold_per_min) { sumGpm += m.gold_per_min; cntGpm++; }
         if (m.xp_per_min)  { sumXpm += m.xp_per_min;  cntXpm++; }
-        if (m.start_time)  hourCounts[new Date(m.start_time*1000).getUTCHours()]++;
+        if (m.start_time)  hourCounts[Dota.hourOf(m.start_time)]++;
       });
       const n = src.length || 1;
       const avgK = (sumK/n).toFixed(1), avgD = (sumD/n).toFixed(1), avgA = (sumA/n).toFixed(1);
       const kda  = avgD>0 ? ((parseFloat(avgK)+parseFloat(avgA))/parseFloat(avgD)).toFixed(2) : '∞';
       const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
 
-      // Role distribution
-      const roleCounts = {};
-      // Use all matches for role distribution
-      const allForRoles = matches.length ? matches : src;
-      allForRoles.forEach(m => {
-        const r = m.lane_role;
-        if (r && r > 0) roleCounts[r] = (roleCounts[r]||0)+1;
+      // Позиции за 30 дней — та же оценка, что в профиле
+      const posCounts = {};
+      (d.month || []).forEach(m => {
+        const p = Dota.estimatePosition(m, heroMetaMap[m.hero_id]?.name);
+        posCounts[p] = (posCounts[p] || 0) + 1;
       });
-      const rolesStr = Object.entries(roleCounts)
-        .sort((a,b)=>b[1]-a[1]).slice(0,3)
-        .map(([r,c])=>`${ROLE_NAMES[r]||'?'} (${c})`).join(', ') || 'Нет данных';
+      const posTotal = Object.values(posCounts).reduce((a, b) => a + b, 0);
+      const rolesStrFinal = posTotal
+        ? Object.entries(posCounts).sort((a, b) => b[1] - a[1]).slice(0, 3)
+            .map(([p, c]) => `${Dota.positionName(+p)} — ${Math.round(c / posTotal * 100)}%`).join(', ')
+        : 'нет данных';
 
       // Считаем стрики из матчей
       const allMatchResults = (matches.length ? matches : src).map(m => (m.player_slot < 128) === m.radiant_win);
@@ -380,20 +378,6 @@ function loadCachedData() {
         if(won){runW++;runL=0;maxWinStreak=Math.max(maxWinStreak,runW);}
         else{runL++;runW=0;maxLoseStreak=Math.max(maxLoseStreak,runL);}
       });
-
-      // Роли из counts кэша если есть
-      const ROLE_NAMES_LOCAL = {1:'Carry',2:'Mid',3:'Offlane',4:'Soft Support',5:'Hard Support'};
-      let rolesStrFinal = rolesStr;
-      if (d.counts?.lane_role) {
-        const rc = {};
-        Object.entries(d.counts.lane_role).forEach(([r,obj]) => {
-          const cnt = typeof obj==='object'?obj.games||0:obj;
-          if(parseInt(r)>0) rc[r]=cnt;
-        });
-        const total_roles = Object.values(rc).reduce((a,b)=>a+b,0)||1;
-        rolesStrFinal = Object.entries(rc).sort((a,b)=>b[1]-a[1]).slice(0,3)
-          .map(([r,c])=>`${ROLE_NAMES_LOCAL[r]||'?'} (${Math.round(c/total_roles*100)}%)`).join(', ') || rolesStr;
-      }
 
       cachedStats = {
         winrate: wr, kda, totalMatches: total, wins, losses,
@@ -422,7 +406,7 @@ function loadCachedData() {
     }
 
     // Matches cache
-    const matchCache = JSON.parse(localStorage.getItem('mercury_matches_cache') || 'null');
+    const matchCache = JSON.parse(localStorage.getItem('mercury_matches_cache_v2') || 'null');
     if (matchCache?.data) {
       cachedMatches = matchCache.data.slice(0, 10);
       renderMatchSelector(cachedMatches);
@@ -945,7 +929,7 @@ async function analyzeMatch() {
     damage:    m.hero_damage ? Math.round(m.hero_damage).toLocaleString('ru') : '—',
     networth:  m.net_worth   ? Math.round(m.net_worth).toLocaleString('ru')  : '—',
     duration:  m.duration    ? secToTime(m.duration) : '—',
-    role:      ROLE_NAMES[m.lane_role] || 'неизвестно',
+    role:      Dota.positionName(Dota.estimatePosition(m, hero?.name)),
   };
   await callAI('match', data, 'btn-match', 'result-match');
 }

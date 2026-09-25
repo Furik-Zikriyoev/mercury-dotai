@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/js/app.js"></script>
+  <script src="/js/dota.js"></script>
   <script>DotAi.requireSession();</script>
   <title>Mercury DotAi — Матчи</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -306,7 +307,7 @@
         <thead>
           <tr>
             <th class="th-nosort" style="width:220px">Герой</th>
-            <th onclick="sortBy('lane_role')">Роль <span class="sort-icon" id="si-lane_role"></span></th>
+            <th onclick="sortBy('position')"><span class="has-tip" tabindex="0" data-tip="Позиция определена примерно: кор или саппорт — по фарму, какая именно — по линии в разобранных матчах, иначе по герою.">Позиция</span> <span class="sort-icon" id="si-position"></span></th>
             <th onclick="sortBy('result')">Результат <span class="sort-icon" id="si-result"></span></th>
             <th onclick="sortBy('duration')">Время <span class="sort-icon" id="si-duration"></span></th>
             <th onclick="sortBy('kda')">KDA <span class="sort-icon" id="si-kda"></span></th>
@@ -351,32 +352,15 @@ const ROLE_SVGS = {
   5: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
 };
 const ROLE_COLORS = {1:'#4ade80',2:'#60a5fa',3:'#f87171',4:'#facc15',5:'#c084fc'};
-const ROLE_NAMES = {1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
-// Guess lane role by hero name
-const MID_HEROES    = ['invoker','storm spirit','queen of pain','shadow fiend','lina','puck','skywrath','tinker','zeus','ember spirit','outworld','void spirit','templar assassin','death prophet','arc warden'];
-const CARRY_HEROES  = ['anti-mage','juggernaut','phantom lancer','faceless void','morphling','spectre','terrorblade','luna','gyrocopter','medusa','drow ranger','sniper','slark','phantom assassin','clinkz','bloodseeker','ursa','weaver','lifestealer'];
-const OFF_HEROES    = ['axe','dragon knight','centaur','tidehunter','mars','underlord','night stalker','bristleback','dark seer','beastmaster','sand king','slardar','magnus','brew'];
-const SUPPORT_HEROES= ['crystal maiden','witch doctor','shadow shaman','warlock','jakiro','omniknight','dazzle','pugna','vengeful spirit','lich','disruptor','keeper','oracle','winter wyvern','ancient apparition'];
-const HARD_HEROES   = ['lion','shadow shaman','witch doctor','jakiro','lich','winter wyvern','techies','earth spirit','rubick'];
-
-function guessLaneRole(heroId) {
-  const h = heroMetaMap[heroId];
-  if (!h) return 0;
-  const n = h.name.toLowerCase();
-  if (HARD_HEROES.some(x => n.includes(x)))    return 5;
-  if (SUPPORT_HEROES.some(x => n.includes(x))) return 4;
-  if (MID_HEROES.some(x => n.includes(x)))     return 2;
-  if (CARRY_HEROES.some(x => n.includes(x)))   return 1;
-  if (OFF_HEROES.some(x => n.includes(x)))     return 3;
-  const attr = h.attr || '';
-  if (attr === 'str') return 3;
-  if (attr === 'agi') return 1;
-  return 4;
+// Позиция 1–5 — оценка из js/dota.js (по фарму, линии и герою)
+function position(m) {
+  if (m.position === undefined) m.position = Dota.estimatePosition(m, heroMetaMap[m.hero_id]?.name);
+  return m.position;
 }
 
-const GAME_MODES = {0:'Unknown',1:'All Pick',2:'Captains Mode',3:'Random Draft',4:'Single Draft',5:'All Random',22:'Ranked All Pick',23:'Turbo'};
-
-const CACHE_KEY = 'mercury_matches_cache';
+const CACHE_KEY = 'mercury_matches_cache_v2';
+const ALL_FIELDS = ['match_id','player_slot','radiant_win','duration','game_mode','lobby_type','hero_id','start_time',
+  'kills','deaths','assists','last_hits','gold_per_min','xp_per_min','hero_damage','lane_role'].map(f => 'project=' + f).join('&');
 const CACHE_TTL = 20 * 60 * 1000; // 20 min
 
 // =============================================
@@ -497,7 +481,7 @@ function sortBy(field) {
 }
 
 function hasFullData(m) {
-  return m.kills !== undefined && m.hero_damage !== undefined;
+  return m.kills != null && m.hero_damage != null;
 }
 
 function getSorted() {
@@ -513,6 +497,7 @@ function getSorted() {
     let va, vb;
     if (sortField === 'result')    { va = isWin(a)?1:0; vb = isWin(b)?1:0; }
     else if (sortField === 'kda')  { va = kda(a); vb = kda(b); }
+    else if (sortField === 'position') { va = position(a); vb = position(b); }
     else                           { va = a[sortField]||0; vb = b[sortField]||0; }
     return sortAsc ? va-vb : vb-va;
   });
@@ -550,9 +535,9 @@ function renderList() {
       </td>
            <td>
         ${(() => {
-          const role = m.lane_role || guessLaneRole(m.hero_id);
+          const role = position(m);
           return role
-            ? `<div style="display:flex;align-items:center;gap:6px;color:#e8e6f8;font-size:12px;font-weight:500"><span style="display:flex;align-items:center;flex-shrink:0">${ROLE_SVGS[role]}</span><span>${ROLE_NAMES[role]}</span></div>`
+            ? `<div style="display:flex;align-items:center;gap:6px;color:#e8e6f8;font-size:12px;font-weight:500"><span style="display:flex;align-items:center;flex-shrink:0;color:${ROLE_COLORS[role]}">${ROLE_SVGS[role]}</span><span>${Dota.positionName(role)}</span></div>`
             : '<span style="color:var(--txt4)">—</span>';
         })()}
       </td>
@@ -626,7 +611,7 @@ function renderDetail(m) {
   const dire    = (m.players||[]).filter(p => p.player_slot >= 128);
   const winner  = m.radiant_win ? 'Radiant' : 'Dire';
   const dur     = secToTime(m.duration);
-  const mode    = GAME_MODES[m.game_mode] || 'Unknown';
+  const mode    = Dota.modeName(m.game_mode) + (Dota.isRanked(m) ? ' · рейтинговый' : '');
   const ago     = timeAgo(m.start_time);
 
   function playerRow(p) {
@@ -928,19 +913,6 @@ async function init() {
 
   const user = JSON.parse(userRaw);
   myLogin = user.login;
-  document.getElementById('nav-username').textContent = user.login;
-  const navAv = document.getElementById('nav-avatar');
-const steamAv = localStorage.getItem('steam_avatar');
-if (navAv) {
-  if (steamAv) {
-    navAv.innerHTML = `<img src="${steamAv}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-    navAv.style.background = 'none';
-    navAv.style.overflow = 'hidden';
-    navAv.style.padding = '0';
-  } else if (user.login) {
-    navAv.textContent = user.login.slice(0,2).toUpperCase();
-  }
-}
 
 
   if (steamId) {
@@ -993,7 +965,8 @@ if (navAv) {
     // Strategy: load all matches for history, enrich first 20 from recentMatches
     const [recentRes, allRes] = await Promise.all([
       fetch(`https://api.opendota.com/api/players/${myId32}/recentMatches`),
-      fetch(`https://api.opendota.com/api/players/${myId32}/matches`),
+      // У всех матчей берём фарм и линию — по ним считается позиция
+      fetch(`https://api.opendota.com/api/players/${myId32}/matches?` + ALL_FIELDS),
     ]);
 
     const recent = recentRes.ok ? await recentRes.json() : [];
@@ -1011,7 +984,7 @@ if (navAv) {
     allMatches = [...recent, ...extra];
 
     document.getElementById('matches-sub').textContent =
-      `${allMatches.length} матчей · первые 20 с полной статистикой · нажми на строку для деталей`;
+      `${allMatches.length.toLocaleString('ru')} матчей · нажми на строку для деталей`;
 
     saveCache(allMatches);
     showCacheBar(Date.now());
