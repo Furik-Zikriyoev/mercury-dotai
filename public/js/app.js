@@ -84,33 +84,72 @@ const DotAi = (() => {
   }
 
   // ── Плашка демо-режима ─────────────────────────────────────────
+  // Карточка в левом нижнем углу: меню сверху закреплено, туда её не поставить.
+  // Крестик сворачивает её в значок до конца сессии браузера.
+  const COLLAPSED_KEY = 'demo_bar_collapsed';
+
   function updateQuota(q) {
     const el = document.getElementById('demo-quota');
     if (el) el.textContent = `Запросов к ИИ сегодня: ${q.left} из ${q.limit}`;
   }
 
+  function setCollapsed(bar, collapsed) {
+    bar.classList.toggle('collapsed', collapsed);
+    try {
+      sessionStorage.setItem(COLLAPSED_KEY, collapsed ? '1' : '');
+    } catch {
+      // без sessionStorage просто не запоминаем
+    }
+  }
+
   function mountDemoBar() {
     if (!isDemo() || document.getElementById('demo-bar')) return;
-    const bar = document.createElement('div');
+    const bar = document.createElement('aside');
     bar.id = 'demo-bar';
     bar.innerHTML = `
-      <span><b>Демо-режим.</b> Вы смотрите профиль тестового игрока.</span>
-      <span id="demo-quota"></span>
-      <button type="button" id="demo-register">Зарегистрироваться со своим Steam</button>`;
-    document.body.prepend(bar);
-    bar.querySelector('#demo-register').addEventListener('click', () => logout('/index.html?register=1'));
+      <button type="button" class="demo-chip" title="Показать">Демо</button>
+      <div class="demo-card">
+        <button type="button" class="demo-close" aria-label="Свернуть">×</button>
+        <b>Демо-режим</b>
+        <span>Вы смотрите профиль тестового игрока.</span>
+        <span id="demo-quota"></span>
+        <button type="button" class="demo-register">Зарегистрироваться со своим Steam</button>
+      </div>`;
+    document.body.appendChild(bar);
+
+    let collapsed = false;
+    try {
+      collapsed = sessionStorage.getItem(COLLAPSED_KEY) === '1';
+    } catch {
+      // игнорируем
+    }
+    setCollapsed(bar, collapsed);
+
+    bar.querySelector('.demo-close').addEventListener('click', () => setCollapsed(bar, true));
+    bar.querySelector('.demo-chip').addEventListener('click', () => setCollapsed(bar, false));
+    bar.querySelector('.demo-register').addEventListener('click', () => logout('/index.html?register=1'));
     api('/ai/quota').then(updateQuota).catch(() => {});
   }
 
   const style = document.createElement('style');
   style.textContent = `
-    #demo-bar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 18px;
-      padding:8px 16px;font:13px/1.4 Inter,system-ui,sans-serif;color:#e8e6f8;
-      background:linear-gradient(90deg,rgba(83,74,183,.95),rgba(127,119,221,.95));}
-    #demo-quota{opacity:.85}
-    #demo-register{font:inherit;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);
-      border-radius:8px;padding:4px 12px;cursor:pointer}
-    #demo-register:hover{background:rgba(255,255,255,.24)}`;
+    #demo-bar{position:fixed;left:16px;bottom:16px;z-index:1000;font:13px/1.45 Inter,system-ui,sans-serif;color:#e8e6f8}
+    #demo-bar .demo-card{position:relative;display:flex;flex-direction:column;gap:4px;max-width:280px;padding:14px 16px;
+      background:rgba(20,18,40,.94);border:1px solid rgba(127,119,221,.45);border-radius:12px;
+      box-shadow:0 8px 28px rgba(0,0,0,.45);backdrop-filter:blur(12px)}
+    #demo-bar .demo-card b{color:#AFA9EC;padding-right:22px}
+    #demo-quota{color:#9994c0;font-size:12px}
+    #demo-bar .demo-close{position:absolute;top:6px;right:8px;width:24px;height:24px;border:none;border-radius:6px;
+      background:none;color:#9994c0;font-size:18px;line-height:1;cursor:pointer}
+    #demo-bar .demo-close:hover{background:rgba(255,255,255,.08);color:#fff}
+    #demo-bar .demo-register{margin-top:6px;font:inherit;font-weight:600;color:#fff;background:#7F77DD;border:none;
+      border-radius:8px;padding:7px 12px;cursor:pointer}
+    #demo-bar .demo-register:hover{background:#6b63c9}
+    #demo-bar .demo-chip{display:none;font:inherit;font-weight:600;color:#fff;background:#7F77DD;border:none;
+      border-radius:999px;padding:6px 14px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+    #demo-bar.collapsed .demo-card{display:none}
+    #demo-bar.collapsed .demo-chip{display:block}
+    @media (max-width:600px){#demo-bar{left:10px;bottom:10px}#demo-bar .demo-card{max-width:calc(100vw - 20px)}}`;
   document.head.appendChild(style);
 
   document.addEventListener('DOMContentLoaded', mountDemoBar);
