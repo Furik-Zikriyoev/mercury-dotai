@@ -9,9 +9,9 @@ export async function sendResetEmail(user, link) {
   }
 
   const transporter = nodemailer.createTransport({
-    host: 'smtp.mail.ru',
-    port: 465,
-    secure: true,
+    host: config.mail.host,
+    port: config.mail.port,
+    secure: config.mail.port === 465,
     auth: { user: config.mail.user, pass: config.mail.pass },
   });
 

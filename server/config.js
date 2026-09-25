@@ -30,6 +30,9 @@ export const config = {
   },
 
   mail: {
+    // По умолчанию mail.ru. Для Gmail: smtp.gmail.com, для Яндекса: smtp.yandex.ru (порт 465 у всех)
+    host: process.env.EMAIL_HOST || 'smtp.mail.ru',
+    port: int('EMAIL_PORT', 465),
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
   },
