@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/app.js"></script>
+  <script>DotAi.requireSession();</script>
   <title>Mercury DotAi — Матчи</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -655,7 +657,7 @@ function renderDetail(m) {
           </div>
           <div>
             <div class="player-hero-name">${name}</div>
-            <div class="player-name">${pname}</div>
+            <div class="player-name">${DotAi.escText(pname)}</div>
           </div>
         </div>
       </td>
@@ -917,10 +919,6 @@ function showList() {
 // =============================================
 //   INIT
 // =============================================
-function handleLogout() {
-  localStorage.clear();
-  window.location.href = '/index.html';
-}
 
 async function init() {
   const token   = localStorage.getItem('token');

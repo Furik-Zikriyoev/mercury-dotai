@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/app.js"></script>
+  <script>DotAi.requireSession();</script>
   <title>Mercury DotAi — ИИ-анализ</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <style>
@@ -260,7 +262,6 @@
 // =============================================
 //   STATE
 // =============================================
-const API = 'http://localhost:3000/api';
 const CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes';
 const ROLE_NAMES = {1:'Carry',2:'Mid',3:'Offlane',4:'Support',5:'Hard Support'};
 const AI_CACHE_KEY = 'mercury_ai_results';
@@ -293,7 +294,6 @@ function clearAIResults() {
 // =============================================
 //   INIT
 // =============================================
-function handleLogout() { localStorage.clear(); window.location.href = '/index.html'; }
 
 function resetAllAnalysis() {
   clearAIResults();
@@ -545,8 +545,9 @@ function setLoading(btnId, loading) {
   btn.classList.toggle('loading', loading);
 }
 
+// Ответ ИИ — чужой текст: экранируем до того, как добавить свою разметку
 function formatAnalysis(text) {
-  return text
+  return DotAi.escText(text)
     .split('\n')
     .filter(l => l.trim())
     .map(l => {
@@ -606,7 +607,7 @@ function heroImgFromName(name) {
 }
 
 function formatHeroes(text) {
-  const lines = text.split('\n');
+  const lines = DotAi.escText(text).split('\n');
   let result = '';
   let i = 0;
 
@@ -768,6 +769,7 @@ function formatHeroes(text) {
 }
 
 function formatMatch(text, matchData) {
+  text = DotAi.escText(text);
   const isWin = matchData?.result === 'Победа';
   const heroEntry = matchData ? Object.values(heroMetaMap).find(h => h.name === matchData.hero) : null;
   const heroImgUrl = heroEntry ? `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${heroEntry.img}.png` : '';
@@ -886,18 +888,11 @@ function showThinking(resultId) {
 }
 
 async function callAI(type, data, btnId, resultId) {
-  const token = localStorage.getItem('token');
   setLoading(btnId, true);
   showThinking(resultId);
 
   try {
-    const res = await fetch(`${API}/ai/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ type, data }),
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Ошибка сервера');
+    const result = await DotAi.api('/ai/analyze', { method: 'POST', body: { type, data } });
 
     // Use dedicated formatter per type
     const wrap = document.getElementById(resultId);
